@@ -3438,16 +3438,20 @@ async function scanWatchlistOutliers() {
   try {
     let rawOutliers = [];
     try {
-      const vidiqRes = await callClaudeVidIQ(claudeKey, `Use vidiq_outliers to find top breakout videos. keyword="${ideationData.watchlist.map(ch=>ch.category).join(' ')}", contentType="long", limit=15. Also search for channels: ${ideationData.watchlist.map(ch=>ch.name).join(', ')}. For each video return: title, channel name, view count, video ID, thumbnail URL.`);
+      const vidiqRes = await callClaudeVidIQ(claudeKey, `Use vidiq_outliers to find top breakout videos. keyword="${ideationData.watchlist.map(ch=>ch.category).join(' ')}", contentType="long", limit=15. For each video return: title, channel name, view count, video ID, thumbnail URL.`);
       const toolResults = vidiqRes?.toolResults||[];
-      for (const tr of toolResults) {
+      const textBlocks = vidiqRes?.textBlocks||[];
+      // Parse tool results using correct block structure
+      for (const block of toolResults) {
+        const txt = block.content?.[0]?.text||'';
+        if (!txt) continue;
         try {
-          const parsed = JSON.parse(tr);
-          const videos = parsed.videos||parsed.results||parsed.data||parsed.outliers||[];
+          const parsed = JSON.parse(txt);
+          const videos = parsed.videos||parsed.results||parsed.data||parsed.outliers||(Array.isArray(parsed)?parsed:null);
           if (Array.isArray(videos)&&videos.length) {
             rawOutliers = videos.map(v=>({
-              title:v.title||v.name||'',
-              channel:v.channel_title||v.channel||v.channelTitle||'',
+              title:v.title||v.videoTitle||v.name||'',
+              channel:v.channel_title||v.channel||v.channelTitle||v.channelName||'',
               views:v.views||v.view_count||v.viewCount||0,
               videoId:v.video_id||v.videoId||v.id||'',
               thumbnail:v.thumbnail||v.thumbnail_url||v.thumbnailUrl||''
@@ -3456,9 +3460,17 @@ async function scanWatchlistOutliers() {
           }
         } catch(e) {}
       }
+      // Fallback: parse text blocks for video titles/channels
       if (!rawOutliers.length) {
-        const text = (vidiqRes?.textBlocks||[]).join('\n');
-        if (text) rawOutliers = text.split('\n').filter(l=>l.trim().length>10).slice(0,12).map(l=>({title:l.replace(/^[-\d.*\u2022]\s*/,'').trim(),channel:'',views:0,videoId:'',thumbnail:''}));
+        const text = textBlocks.map(b=>b.text||'').join('\n');
+        if (text) {
+          const lines = text.split('\n').filter(l=>l.trim().length>10&&!l.startsWith('#'));
+          rawOutliers = lines.slice(0,12).map(l=>{
+            const viewMatch = l.match(/([\d,.]+[KkMm]?)\s*(?:views?)/i);
+            const views = viewMatch ? viewMatch[1] : '';
+            return {title:l.replace(/^[-\d.*•]\s*/,'').replace(/\(.*?\)/g,'').trim(),channel:'',views:0,viewsLabel:views,videoId:'',thumbnail:''};
+          }).filter(v=>v.title.length>5);
+        }
       }
     } catch(e) { rawOutliers=[]; }
 
@@ -3472,7 +3484,7 @@ async function scanWatchlistOutliers() {
             const ytId = v.videoId;
             const thumbUrl = v.thumbnail||(ytId?`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`:'');
             const videoUrl = ytId?`https://youtube.com/watch?v=${ytId}`:'#';
-            const views = v.views?(v.views>=1000000?(v.views/1000000).toFixed(1)+'M':v.views>=1000?(v.views/1000).toFixed(0)+'K':v.views):'';
+            const views = v.views?(v.views>=1000000?(v.views/1000000).toFixed(1)+'M':v.views>=1000?(v.views/1000).toFixed(0)+'K':v.views):(v.viewsLabel||'');
             const safeTitle = escHtml(v.title);
             const safeChannel = escHtml(v.channel||'');
             const safeUrl = escHtml(videoUrl);
@@ -3485,7 +3497,7 @@ async function scanWatchlistOutliers() {
                   ${views?`<span style="font-size:10px;color:var(--muted)">${views} views</span>`:''}
                 </div>
               </div>
-              <button onclick="prefillBendUrl(this)" data-url="${safeUrl}" data-title="${safeTitle}" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:10px;padding:4px 8px;white-space:nowrap;font-family:var(--ui)">Use for bend 2192</button>
+              <button onclick="prefillBendUrl(this)" data-url="${safeUrl}" data-title="${safeTitle}" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:10px;padding:4px 8px;white-space:nowrap;font-family:var(--ui)">Use for bend →</button>
             </div>`;
           }).join('')}
         </div>`;
