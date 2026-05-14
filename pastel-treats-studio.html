@@ -437,12 +437,6 @@ select option{background:var(--s1)}
 .ai-badge-gemini { color:#7c3aed!important;background:rgba(124,58,237,0.08)!important;border-color:rgba(124,58,237,0.2)!important; }
 .ai-badge-kling  { color:#c05621!important;background:rgba(192,86,33,0.08)!important;border-color:rgba(192,86,33,0.2)!important; }
 .ai-badge-free   { color:var(--muted)!important;background:var(--s2)!important;border-color:var(--border)!important; }
-.ai-panel-card{background:rgba(26,111,181,0.04);border:1px solid rgba(26,111,181,0.15);border-radius:10px;padding:12px 16px;margin-bottom:20px}
-.ai-panel-card-title{font-family:var(--ui);font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px}
-.ai-panel-rows{display:flex;flex-direction:column;gap:7px}
-.ai-panel-row{display:flex;align-items:center;gap:10px}
-.ai-panel-task{font-size:12px;color:var(--text);flex:1}
-.ai-panel-cost{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
 
 /* ── NICHE FINDER ── */
 .niche-header{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);border-radius:12px;padding:20px 24px;margin-bottom:20px;color:#fff;position:relative;overflow:hidden}
@@ -606,8 +600,8 @@ select option{background:var(--s1)}
 
   <div class="nav-section">
     <div class="nav-label">Workflow</div>
-    <button class="nav-item" onclick="showPanel('ideas')" id="nav-ideas">
-      <span class="nav-icon">💡</span> Ideas
+    <button class="nav-item" onclick="showPanel('ideation')" id="nav-ideation">
+      <span class="nav-icon">🧬</span> Ideation
     </button>
     <button class="nav-item active" onclick="showPanel('studio')" id="nav-studio">
       <span class="nav-icon">🎬</span> Studio
@@ -617,12 +611,6 @@ select option{background:var(--s1)}
     </button>
     <button class="nav-item nested" onclick="showPanel('thumbnails')" id="nav-thumbnails" style="padding-left:28px">
       <span class="nav-icon">🖼️</span> Thumbnails
-    </button>
-    <button class="nav-item" onclick="showPanel('branding')" id="nav-branding">
-      <span class="nav-icon">✨</span> Branding
-    </button>
-    <button class="nav-item" onclick="showPanel('niche')" id="nav-niche">
-      <span class="nav-icon">🔭</span> Research
     </button>
   </div>
 
@@ -651,8 +639,8 @@ select option{background:var(--s1)}
       <span id="whisper-status-txt">OpenAI Whisper</span>
     </div>
     <div class="api-status">
-      <div class="status-dot" id="vidiq-dot"></div>
-      <span id="vidiq-status-txt">vidIQ</span>
+      <div class="status-dot ok"></div>
+      <span>vidIQ (connected)</span>
     </div>
   </div>
 </aside>
@@ -714,7 +702,7 @@ select option{background:var(--s1)}
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
           <div class="card-title" style="margin-bottom:0">Video topic</div>
-          <button class="btn btn-ghost btn-sm" onclick="showPanel('ideas')" style="font-size:11px">💡 Get ideas first →</button>
+          <button class="btn btn-ghost btn-sm" onclick="showPanel('ideation')" style="font-size:11px">🧬 Ideation →</button>
         </div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Paste a topic from the Ideas tab, or type your own.</div>
         <label>Topic or title idea</label>
@@ -1231,13 +1219,6 @@ select option{background:var(--s1)}
         </div>
         <button class="btn" style="background:#fff;color:#6c3fcf;font-family:var(--ui);font-weight:700;font-size:13px" onclick="showThumbCreateForm()">+ New Project</button>
       </div>
-      <div class="ai-panel-card">
-        <div class="ai-panel-card-title">🤖 AI used in this tab</div>
-        <div class="ai-panel-rows">
-          <div class="ai-panel-row"><span class="ai-panel-task">Generate / recreate thumbnail</span><span class="ai-badge ai-badge-gemini" style="font-size:9px">Gemini 2.5 Flash</span><span class="ai-panel-cost">free tier</span></div>
-          <div class="ai-panel-row"><span class="ai-panel-task">Analyse thumbnail</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku</span><span class="ai-panel-cost">~$0.001</span></div>
-        </div>
-      </div>
 
       <div id="thumb-create-form" style="display:none" class="thumb-create-form">
         <input type="text" id="thumb-new-name" placeholder="Enter video title or project name…" style="margin-bottom:0" onkeydown="if(event.key==='Enter')createThumbProject()" />
@@ -1426,633 +1407,288 @@ select option{background:var(--s1)}
     </div>
   </div>
 
-  <!-- ════════ BRANDING PANEL ════════ -->
-  <div class="panel" id="panel-branding">
+  <!-- ════════ IDEATION PANEL ════════ -->
+  <div class="panel" id="panel-ideation">
     <div class="page-header">
-      <div class="page-title"><span class="page-title-icon">✨</span> Channel Branding</div>
-      <div class="page-desc">AI-powered YouTube banner & profile picture generator with live preview.</div>
-    </div>
-    <div class="ai-panel-card">
-      <div class="ai-panel-card-title">🤖 AI used in this tab</div>
-      <div class="ai-panel-rows">
-        <div class="ai-panel-row"><span class="ai-panel-task">Generate profile pic &amp; banner</span><span class="ai-badge ai-badge-gemini" style="font-size:9px">Gemini 2.5 Flash</span><span class="ai-panel-cost">free tier</span></div>
-        <div class="ai-panel-row"><span class="ai-panel-task">Branding chat responses</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku</span><span class="ai-panel-cost">~$0.001</span></div>
-      </div>
+      <div class="page-title"><span class="page-title-icon">🧬</span> Ideation</div>
+      <div class="page-desc">Niche Bending + Script Bending — your YouTube launch framework.</div>
     </div>
 
-    <!-- Channel selector -->
-    <div class="card" style="margin-bottom:16px;padding:14px 16px">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div style="font-family:var(--ui);font-size:12px;font-weight:700;color:var(--text);white-space:nowrap">Channel</div>
-        <select id="branding-channel-select" style="margin-bottom:0;flex:1;min-width:160px" onchange="switchBrandingChannel(this.value)">
-          <option value="">— Select a channel profile —</option>
-        </select>
-        <button class="btn btn-ghost btn-sm" onclick="showPanel('ideas')" style="white-space:nowrap">+ Add profile →</button>
-        <button class="btn btn-ghost btn-sm" onclick="saveBrandingToProfile()" id="branding-save-profile-btn" style="white-space:nowrap">💾 Save to profile</button>
-        <button class="btn btn-ghost btn-sm" onclick="downloadBrandingZip()" id="branding-zip-btn" style="white-space:nowrap">↓ Download ZIP</button>
+    <!-- Core Formula Banner -->
+    <div style="background:linear-gradient(135deg,#1a0a2e,#2d1060);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px 20px;margin-bottom:20px">
+      <div style="font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:10px">Core Formula</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px">
+          <div style="font-size:10px;color:rgba(255,255,255,0.45);font-family:var(--ui);font-weight:600;margin-bottom:4px">VIRAL CHANNEL</div>
+          <div style="font-size:13px;font-weight:700;color:#fff;font-family:var(--ui)">Proven Format <span style="color:var(--pink2)">×</span> Untapped Market</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px">
+          <div style="font-size:10px;color:rgba(255,255,255,0.45);font-family:var(--ui);font-weight:600;margin-bottom:4px">VIRAL VIDEO</div>
+          <div style="font-size:13px;font-weight:700;color:#fff;font-family:var(--ui)">Unique Idea <span style="color:var(--pink2)">+</span> Proven Storytelling Framework</div>
+        </div>
       </div>
+      <div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.35);font-style:italic">A niche is simply format + market. You never invent both. You borrow one and own the other.</div>
     </div>
 
-    <div class="branding-layout">
-      <!-- LEFT: Chat -->
-      <div class="branding-chat">
-        <div class="branding-chat-header">
-          <div class="branding-chat-avatar">🤖</div>
+    <!-- PHASE 1 -->
+    <div style="font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--pink2);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+      <span style="background:var(--pink2);color:#fff;border-radius:4px;padding:2px 7px;font-size:9px">PHASE 1</span> Niche Bending — Find Your Channel
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+
+      <!-- FINDING PROVEN FORMAT -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <div>
-            <div class="branding-chat-title">Branding AI</div>
-            <div class="branding-chat-sub">Create banner & profile pic</div>
-          </div>
-        </div>
-        <div class="branding-messages" id="branding-messages"></div>
-        <div class="branding-input-row">
-          <input type="text" id="branding-input" placeholder="Describe your channel… e.g. Pastel science explainer with a stickman mascot" style="margin-bottom:0" onkeydown="if(event.key==='Enter')sendBrandingMessage()" />
-          <button class="btn btn-pink btn-sm" onclick="sendBrandingMessage()" id="branding-send-btn">Send</button>
-        </div>
-        <div class="branding-model-row">
-          <button class="branding-model-btn active" onclick="setBrandingModel('gemini-2.5-flash-preview-05-20',this)">Gemini 2.5 Flash</button>
-          <button class="branding-model-btn" onclick="setBrandingModel('gemini-2.0-flash-exp-image-generation',this)">Gemini 2.0 Flash</button>
-          <button class="branding-model-btn" onclick="setBrandingModel('imagen-3.0-generate-002',this)">Imagen 3</button>
-        </div>
-      </div>
-
-      <!-- RIGHT: Preview -->
-      <div class="branding-preview">
-        <div class="branding-preview-title">
-          Channel Preview
-          <span style="font-size:10px;color:var(--muted2);font-weight:400;text-transform:none">Desktop view</span>
-        </div>
-
-        <!-- YouTube mock -->
-        <div class="yt-preview">
-          <div class="yt-banner" id="yt-banner">
-            <div class="yt-banner-placeholder" id="yt-banner-placeholder">Your banner will appear here</div>
-          </div>
-          <div class="yt-channel-row">
-            <div class="yt-profile-pic" id="yt-profile-pic">?</div>
-            <div class="yt-channel-info">
-              <div class="yt-channel-name" id="yt-channel-name-display">My Channel</div>
-              <div class="yt-channel-meta">@mychannel · 0 subscribers · 0 videos</div>
-              <div class="yt-channel-more">More about this channel …<a style="color:#065fd4;font-size:12px;font-family:Arial">more</a></div>
-            </div>
-            <button class="yt-subscribe-btn">Subscribe</button>
-          </div>
-          <div class="yt-tabs">
-            <div class="yt-tab active">Home</div>
-            <div class="yt-tab">Videos</div>
-            <div class="yt-tab">Shorts</div>
-            <div class="yt-tab">Playlists</div>
-            <div class="yt-tab">Posts</div>
-          </div>
-          <div style="height:12px"></div>
-        </div>
-
-        <!-- Channel name input -->
-        <div style="margin-top:14px">
-          <label>Channel name (for preview)</label>
-          <input type="text" id="branding-channel-name" placeholder="My Channel" value="My Channel" style="margin-bottom:0" oninput="document.getElementById('yt-channel-name-display').textContent=this.value||'My Channel'" />
-        </div>
-
-        <!-- Asset cards -->
-        <div class="branding-assets">
-          <div class="branding-asset-card">
-            <div class="branding-asset-title">Banner</div>
-            <div class="branding-asset-size">2560 × 1440</div>
-            <div class="branding-asset-preview" id="banner-asset-preview" style="aspect-ratio:2560/1440;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--muted2);font-size:11px">Not generated</div>
-            <div id="banner-gen-loading" class="branding-gen-loading" style="display:none"><div class="spinner"></div> Generating banner…</div>
-            <button class="btn btn-ghost btn-sm" id="banner-dl-btn" style="display:none;width:100%;margin-top:4px" onclick="downloadBrandingAsset('banner')">↓ Download</button>
-            <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px" onclick="generateBrandingAsset('banner')" id="banner-gen-btn">✦ Generate</button>
-          </div>
-          <div class="branding-asset-card">
-            <div class="branding-asset-title">Profile Picture</div>
-            <div class="branding-asset-size">500 × 500</div>
-            <div class="branding-asset-preview" id="pfp-asset-preview" style="aspect-ratio:1;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--muted2);font-size:11px">Not generated</div>
-            <div id="pfp-gen-loading" class="branding-gen-loading" style="display:none"><div class="spinner"></div> Generating profile pic…</div>
-            <button class="btn btn-ghost btn-sm" id="pfp-dl-btn" style="display:none;width:100%;margin-top:4px" onclick="downloadBrandingAsset('pfp')">↓ Download</button>
-            <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px" onclick="generateBrandingAsset('pfp')" id="pfp-gen-btn">✦ Generate</button>
+            <div class="card-title" style="margin-bottom:2px">Finding Proven Format</div>
+            <div style="font-size:11px;color:var(--muted)">Add indirect competitor channels → scan for outliers → extract format patterns</div>
           </div>
         </div>
 
-        <!-- Size guide -->
-        <div class="branding-size-guide">
-          <div class="branding-size-guide-title">YouTube Size Guide</div>
-          <div class="branding-size-row">Banner (all devices): <span>2560 × 1440</span></div>
-          <div class="branding-size-row">Safe area (text/logo): <span>1235 × 338</span></div>
-          <div class="branding-size-row">Desktop visible: <span>2560 × 423</span></div>
-          <div class="branding-size-row">Profile picture: <span>500 × 500</span></div>
+        <!-- Watchlist -->
+        <div style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text)">Breakout Channel Watchlist</div>
+            <button class="btn btn-pink btn-sm" onclick="openAddWatchlistModal()">+ Add channel</button>
+          </div>
+          <div id="watchlist-empty" style="font-size:12px;color:var(--muted2);padding:10px 0;display:block">No channels yet. Add indirect competitors — history, military, true crime, finance, self-help.</div>
+          <div id="watchlist-list" style="display:flex;flex-direction:column;gap:6px"></div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ════════ NICHE FINDER PANEL ════════ -->
-  <div class="panel" id="panel-niche">
-    <div class="niche-header">
-      <div style="position:relative;z-index:1">
-        <div class="niche-header-title">🔭 Research</div>
-        <div class="niche-header-sub">Similar channels · viral discovery · channel database — powered by vidIQ</div>
-      </div>
-    </div>
-    <div class="ai-panel-card" style="margin:16px 0 0">
-      <div class="ai-panel-card-title">🤖 AI used in this tab</div>
-      <div class="ai-panel-rows">
-        <div class="ai-panel-row"><span class="ai-panel-task">Similar channels &amp; viral discovery</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku + vidIQ</span><span class="ai-panel-cost">~$0.002/search</span></div>
-        <div class="ai-panel-row"><span class="ai-panel-task">Niche Bend concept generator</span><span class="ai-badge" style="font-size:9px">Claude Sonnet</span><span class="ai-panel-cost">~$0.02</span></div>
-        <div class="ai-panel-row"><span class="ai-panel-task">Channel analysis</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku</span><span class="ai-panel-cost">~$0.002</span></div>
-      </div>
-    </div>
+        <!-- Scan button -->
+        <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="scanWatchlistOutliers()" id="scan-outliers-btn">⚡ Scan for outlier videos</button>
 
-    <!-- Similar Channels Section -->
-    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <!-- Format Library -->
         <div>
-          <div style="font-family:var(--ui);font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px">
-            🔗 Similar Channels Finder
-            <span style="font-size:10px;background:rgba(26,111,181,0.1);color:var(--blue);border:1px solid rgba(26,111,181,0.2);border-radius:4px;padding:2px 6px;font-weight:500">via vidIQ</span>
+          <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px">Format Library <span style="font-weight:400;color:var(--muted2);font-size:10px">— auto-built from scans</span></div>
+          <div id="format-library-empty" style="font-size:12px;color:var(--muted2);padding:6px 0">No formats yet. Scan channels above to populate.</div>
+          <div id="format-library-list" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+        <div id="scan-alert" class="alert" style="display:none;margin-top:10px"></div>
+      </div>
+
+      <!-- UNTAPPED MARKET -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:2px">Untapped Market</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Map formats to markets. Empty slots = opportunities. Add your channels.</div>
+
+        <!-- Your Channels -->
+        <div style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text)">Your Channels</div>
+            <button class="btn btn-pink btn-sm" onclick="openAddChannelModal()">+ Add</button>
           </div>
-          <div style="font-size:12px;color:var(--muted);margin-top:3px">Enter a YouTube channel URL or ID to find similar channels</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input type="text" id="similar-ch-input" placeholder="youtube.com/channel/UC… or @handle or channel ID" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')findSimilarChannels()" />
-        <button class="btn btn-pink btn-sm" onclick="findSimilarChannels()" id="similar-ch-btn">🔗 Find similar</button>
-      </div>
-      <div id="similar-ch-loading" class="loading" style="display:none"><div class="spinner"></div> Finding similar channels via vidIQ…</div>
-      <div id="similar-ch-alert" class="alert" style="display:none"></div>
-      <div id="similar-ch-results" style="display:none">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-size:12px;color:var(--muted)" id="similar-ch-count"></div>
-          <div style="display:flex;gap:6px">
-            <select id="similar-ch-sort" style="margin-bottom:0;font-size:12px;padding:5px 8px" onchange="renderSimilarChannels()">
-              <option value="similarity">Similarity</option>
-              <option value="subs">Subscribers</option>
-              <option value="views">Avg Views</option>
-            </select>
-          </div>
-        </div>
-        <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
-          <table style="width:100%;border-collapse:collapse;font-size:12px">
-            <thead>
-              <tr style="background:var(--s2);text-align:left">
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Channel</th>
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Subscribers</th>
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Avg Views</th>
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Similarity</th>
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="similar-ch-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Saved Channels + Niche Bends -->
-    <div id="saved-channels-section" style="margin-bottom:20px">
-      <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">⭐</div>
-          <div>
-            <div style="font-family:var(--ui);font-size:16px;font-weight:700;color:#fff">Saved Channels</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7)" id="saved-channels-subtitle">0 channels · 0 niche bends</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-sm" onclick="openAddChannelManualModal()" style="background:rgba(255,255,255,0.15);color:#fff;font-family:var(--ui);font-weight:600;border:1px solid rgba(255,255,255,0.3);padding:8px 14px;border-radius:8px;cursor:pointer">+ Add manually</button>
-          <button class="btn btn-sm" onclick="openNicheBendModal()" style="background:#fff;color:#4f46e5;font-family:var(--ui);font-weight:700;border:none;padding:8px 16px;border-radius:8px;cursor:pointer">🧬 Niche Bend</button>
-        </div>
-      </div>
-
-      <!-- Add Channel Manually modal (inline) -->
-      <div id="add-channel-manual-modal" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px">
-        <div style="font-family:var(--ui);font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">➕ Add channel manually</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div><label style="font-size:11px">Channel name <span style="color:var(--red)">*</span></label><input type="text" id="acm-name" placeholder="e.g. EverythingProfessor" style="margin-bottom:0"/></div>
-          <div><label style="font-size:11px">YouTube URL</label><input type="text" id="acm-url" placeholder="youtube.com/@handle" style="margin-bottom:0"/></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
-          <div><label style="font-size:11px">Subscribers</label><input type="text" id="acm-subs" placeholder="e.g. 446K" style="margin-bottom:0"/></div>
-          <div><label style="font-size:11px">Monthly Views</label><input type="text" id="acm-views" placeholder="e.g. 2.1M" style="margin-bottom:0"/></div>
-          <div><label style="font-size:11px">Est. Earnings/mo</label><input type="text" id="acm-earn" placeholder="e.g. $31K" style="margin-bottom:0"/></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px">Status</label>
-            <select id="acm-status" style="margin-bottom:0">
-              <option>New</option>
-              <option>Watching</option>
-              <option>Monetized</option>
-              <option>Not monetized</option>
-              <option>Competitor</option>
-              <option>Inspiration</option>
-            </select>
-          </div>
-          <div><label style="font-size:11px">Tags <span style="color:var(--muted2);font-size:10px">(comma-separated)</span></label><input type="text" id="acm-tags" placeholder="e.g. science, stickman, faceless" style="margin-bottom:0"/></div>
-        </div>
-        <div style="margin-bottom:12px"><label style="font-size:11px">Notes</label><textarea id="acm-notes" placeholder="What you noticed about this channel…" style="min-height:50px;font-size:12px;margin-bottom:0"></textarea></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-pink btn-sm" onclick="saveManualChannel()">✦ Save channel</button>
-          <button class="btn btn-ghost btn-sm" onclick="closeAddChannelManualModal()">Cancel</button>
-        </div>
-      </div>
-
-      <!-- Tabs -->
-      <div style="display:flex;gap:2px;background:var(--s2);border-radius:8px;padding:3px;margin-bottom:14px">
-        <button class="char-modal-tab active" id="sc-tab-channels-btn" onclick="switchSavedTab('channels',this)" style="flex:1;padding:9px">⭐ Channels (<span id="sc-channels-count">0</span>)</button>
-        <button class="char-modal-tab" id="sc-tab-bends-btn" onclick="switchSavedTab('bends',this)" style="flex:1;padding:9px">🧬 Niche Bends (<span id="sc-bends-count">0</span>)</button>
-      </div>
-
-      <!-- Channels tab -->
-      <div id="sc-tab-channels" class="char-modal-section active">
-        <!-- Search + filter bar -->
-        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-          <input type="text" id="sc-search" placeholder="Search name or tag…" style="margin-bottom:0;flex:1;min-width:140px" oninput="renderSavedChannelsTable()" />
-          <select id="sc-filter-status" style="margin-bottom:0" onchange="renderSavedChannelsTable()">
-            <option value="all">All statuses</option>
-            <option value="New">New</option>
-            <option value="Watching">Watching</option>
-            <option value="Monetized">Monetized</option>
-            <option value="Not monetized">Not monetized</option>
-            <option value="Competitor">Competitor</option>
-            <option value="Inspiration">Inspiration</option>
-          </select>
-          <select id="sc-sort" style="margin-bottom:0" onchange="renderSavedChannelsTable()">
-            <option value="recent">Recent</option>
-            <option value="subs">Subscribers</option>
-            <option value="views">Monthly views</option>
-            <option value="earnings">Est. earnings</option>
-          </select>
-        </div>
-        <!-- Table -->
-        <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
-          <table style="width:100%;border-collapse:collapse;font-size:12px" id="sc-table">
-            <thead>
-              <tr style="background:var(--s2);text-align:left">
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Channel</th>
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Status / Tags</th>
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Subscribers</th>
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Monthly Views</th>
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Est. Earnings</th>
-                <th style="padding:10px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="sc-table-body"></tbody>
-          </table>
-          <div id="sc-empty" style="display:none;padding:32px;text-align:center;color:var(--muted);font-size:13px">No saved channels match your filters.</div>
-        </div>
-      </div>
-
-      <!-- Niche Bends tab -->
-      <div id="sc-tab-bends" class="char-modal-section">
-        <input type="text" id="sc-bends-search" placeholder="Search niche bends…" style="margin-bottom:12px" oninput="renderNicheBendsList()" />
-        <div id="sc-bends-list"></div>
-        <div id="sc-bends-empty" style="display:none;padding:40px;text-align:center">
-          <div style="font-size:40px;margin-bottom:10px">🧬</div>
-          <div style="font-family:var(--ui);font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">No niche bends yet</div>
-          <div style="font-size:12px;color:var(--muted)">Save 2+ channels and click "🧬 Niche Bend" to create one.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Niche Bend Modal -->
-    <div id="niche-bend-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeNicheBendModal()">
-      <div style="background:var(--s1);border-radius:14px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;position:relative">
-        <!-- Header -->
-        <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:20px 24px;border-radius:14px 14px 0 0;display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🧬</div>
-          <div>
-            <div style="font-family:var(--ui);font-size:16px;font-weight:700;color:#fff">Niche Bending</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7)" id="niche-bend-step-label">Step 1: Select 2 channels to bend from</div>
-          </div>
-          <button onclick="closeNicheBendModal()" style="margin-left:auto;background:rgba(255,255,255,0.15);border:none;color:#fff;cursor:pointer;padding:6px 10px;border-radius:6px;font-size:12px">✕</button>
+          <div id="my-channels-empty" style="font-size:12px;color:var(--muted2);padding:6px 0">No channels yet.</div>
+          <div id="my-channels-list" style="display:flex;flex-direction:column;gap:6px"></div>
         </div>
 
-        <!-- Step 1: Select channels -->
-        <div id="nb-step1" style="padding:20px 24px">
-          <input type="text" id="nb-search" placeholder="Search saved channels…" style="margin-bottom:12px" oninput="renderNicheBendChannelPicker()" />
-          <div style="font-size:11px;color:var(--muted);margin-bottom:10px" id="nb-selected-count">0 of 2 selected</div>
-          <div id="nb-channel-list" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;margin-bottom:16px"></div>
-          <button class="btn btn-pink" onclick="goNicheBendStep2()" id="nb-next-btn" style="width:100%;opacity:0.4;pointer-events:none">Next: Define Your Niche →</button>
+        <!-- Market grid -->
+        <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px">Permanent Markets</div>
+        <div id="market-grid" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+          <!-- rendered by JS -->
         </div>
 
-        <!-- Step 2: Define niche -->
-        <div id="nb-step2" style="display:none;padding:20px 24px">
-          <div id="nb-selected-chips" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"></div>
-          <div style="font-family:var(--ui);font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">What niche do you want to walk into?</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:12px">The AI will apply the content style, thumbnail strategy, and video format from your selected channels to your target niche.</div>
-          <input type="text" id="nb-niche-input" placeholder="e.g. economics, cooking, fitness, AI tools…" style="margin-bottom:8px" />
-          <div style="background:rgba(79,70,229,0.06);border:1px solid rgba(79,70,229,0.15);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--muted);margin-bottom:16px">
-            🧬 <strong style="color:#4f46e5">How it works:</strong> The AI will analyse the title patterns, content format, and thumbnail style from your selected channels, then create a unique channel concept applying those styles to your target niche.
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-ghost" onclick="goNicheBendStep1()">← Back</button>
-            <button class="btn btn-pink" onclick="generateNicheBend()" id="nb-generate-btn" style="flex:1">🧬 Generate Niche Bend</button>
-          </div>
-        </div>
-
-        <!-- Result -->
-        <div id="nb-result" style="display:none;padding:20px 24px"></div>
-      </div>
-    </div>
-
-    <!-- Upcoming Viral Channels -->
-    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+        <!-- Format × Market mapping -->
         <div>
-          <div style="font-family:var(--ui);font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px">
-            🚀 Upcoming Viral Channels
-            <span style="font-size:10px;background:rgba(26,111,181,0.1);color:var(--blue);border:1px solid rgba(26,111,181,0.2);border-radius:4px;padding:2px 6px;font-weight:500">via vidIQ</span>
-          </div>
-          <div style="font-size:12px;color:var(--muted);margin-top:3px;margin-bottom:12px"><strong style="color:var(--text)">Use when:</strong> You want to discover what channels are blowing up right now in a topic — trend scouting, not similarity matching. Fastest-growing under 500K subs.</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
-        <input type="text" id="viral-niche-input" placeholder="Topic keyword — e.g. science, personal finance, cooking, true crime…" style="margin-bottom:0;flex:1;min-width:200px" onkeydown="if(event.key==='Enter')loadViralChannels(true)" />
-        <button class="btn btn-pink btn-sm" onclick="loadViralChannels(true)" id="viral-refresh-btn">🚀 Load</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Searches channel topics & video titles. Type what the channel is <em>about</em>.</div>
-      <div id="viral-loading" class="loading" style="display:none"><div class="spinner"></div> Fetching breakout channels from vidIQ…</div>
-      <div id="viral-alert" class="alert" style="display:none"></div>
-      <div class="viral-cards" id="viral-cards"></div>
-      <div id="viral-pagination-row" style="display:none;align-items:center;justify-content:space-between;margin-top:10px">
-        <span id="viral-page-info" style="font-size:11px;color:var(--muted);font-family:var(--mono)"></span>
-        <div style="display:flex;gap:6px">
-          <button class="niche-page-btn" id="viral-prev-btn" onclick="loadViralChannels(false,-1)" disabled>← Prev</button>
-          <button class="niche-page-btn" id="viral-next-btn" onclick="loadViralChannels(false,1)">Next →</button>
+          <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px">Format × Market Map</div>
+          <div id="market-map-empty" style="font-size:12px;color:var(--muted2);padding:6px 0">Scan channels to build the format library first.</div>
+          <div id="market-map-table" style="display:none;overflow-x:auto"></div>
         </div>
       </div>
     </div>
 
-    <!-- Niche Channel Finder -->
-    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
-      <div style="font-family:var(--ui);font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        🔎 Niche Channel Finder
-        <span style="font-size:10px;background:rgba(26,111,181,0.1);color:var(--blue);border:1px solid rgba(26,111,181,0.2);border-radius:4px;padding:2px 6px;font-weight:500">via vidIQ</span>
+    <!-- VALIDATE -->
+    <div class="card" style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div class="card-title" style="margin-bottom:2px">Validate Your Niche</div>
+          <div style="font-size:11px;color:var(--muted)">Before committing to building a channel, check all three boxes.</div>
+        </div>
+        <button class="btn btn-pink btn-sm" onclick="openValidateModal()">+ Validate a niche</button>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px"><strong style="color:var(--text)">Use when:</strong> You want to browse and filter across many channels by category, size, and upload frequency — systematic research across a large pool. Channels here come from vidIQ searches you run.</div>
-    <div class="niche-filters">
-      <div style="margin-bottom:14px">
-        <input type="text" id="niche-search" placeholder="Search channel name…" style="margin-bottom:0;font-size:13px" oninput="filterNicheTable()" />
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div class="niche-filter-field">
-          <label>Category</label>
-          <select id="niche-category" style="margin-bottom:0" onchange="filterNicheTable()">
-            <option value="">All Categories</option>
-            <option>Knowledge</option>
-            <option>Lifestyle (sociology)</option>
-            <option>Entertainment</option>
-            <option>Society</option>
-            <option>Film</option>
-            <option>Health</option>
-            <option>Sport</option>
-            <option>Technology</option>
-            <option>Food</option>
-            <option>Politics</option>
-            <option>Basketball</option>
-            <option>Religion</option>
-            <option>Music</option>
-            <option>Video game culture</option>
-            <option>Hobby</option>
-            <option>Association football</option>
-            <option>Military</option>
-            <option>Vehicle</option>
-            <option>Television program</option>
-            <option>Science</option>
-            <option>Psychology</option>
-            <option>Finance</option>
-            <option>Education</option>
-            <option>Comedy</option>
-            <option>Travel</option>
-            <option>Beauty</option>
-            <option>Fitness</option>
-            <option>Business</option>
-            <option>News</option>
-            <option>Animals</option>
-          </select>
-        </div>
-        <div class="niche-filter-field">
-          <label>Monetization</label>
-          <select id="niche-monetization" style="margin-bottom:0" onchange="filterNicheTable()">
-            <option value="">All</option>
-            <option value="yes">Monetized only</option>
-            <option value="no">Not monetized</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:12px">
-        <div class="niche-filter-field">
-          <label>Min Subs</label>
-          <input type="text" id="niche-min-subs" placeholder="e.g. 1000" style="margin-bottom:0;font-size:11px" oninput="filterNicheTable()" />
-        </div>
-        <div class="niche-filter-field">
-          <label>Max Subs</label>
-          <input type="text" id="niche-max-subs" placeholder="e.g. 1M" style="margin-bottom:0;font-size:11px" oninput="filterNicheTable()" />
-        </div>
-        <div class="niche-filter-field">
-          <label>Min Views/mo</label>
-          <input type="text" id="niche-min-views" placeholder="e.g. 10000" style="margin-bottom:0;font-size:11px" oninput="filterNicheTable()" />
-        </div>
-        <div class="niche-filter-field">
-          <label>Max Views/mo</label>
-          <input type="text" id="niche-max-views" placeholder="e.g. 10M" style="margin-bottom:0;font-size:11px" oninput="filterNicheTable()" />
-        </div>
-        <div class="niche-filter-field">
-          <label>Min Earnings/mo</label>
-          <input type="text" id="niche-min-earn" placeholder="e.g. 500" style="margin-bottom:0;font-size:11px" oninput="filterNicheTable()" />
-        </div>
-        <div class="niche-filter-field">
-          <label>Max Earnings/mo</label>
-          <input type="text" id="niche-max-earn" placeholder="e.g. 50000" style="margin-bottom:0;font-size:11px" oninput="filterNicheTable()" />
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <div class="niche-filter-field" style="flex:1;min-width:180px">
-          <label>Search niche keyword (pulls live data from vidIQ)</label>
-          <input type="text" id="niche-keyword" placeholder="e.g. dopamine, sleep, ai tools…" style="margin-bottom:0" onkeydown="if(event.key==='Enter')searchNicheChannels()" />
-        </div>
-        <button class="btn btn-pink" onclick="searchNicheChannels()" id="niche-search-btn" style="align-self:flex-end">🔭 Find channels</button>
-        <button class="btn btn-ghost btn-sm" onclick="clearNicheFilters()" style="align-self:flex-end">Clear All</button>
-        <span id="niche-result-count" style="font-size:12px;color:var(--muted);font-family:var(--mono);align-self:flex-end"></span>
-      </div>
+      <div id="niche-cards-empty" style="font-size:12px;color:var(--muted2);padding:6px 0">No validated niches yet. Pick a format + market combo and validate it.</div>
+      <div id="niche-cards-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
     </div>
 
-    <!-- Table -->
-    <div class="niche-table-wrap">
-      <div style="display:flex;gap:16px;padding:10px 14px;background:var(--s2);border-bottom:1px solid var(--border);font-size:11px;color:var(--muted)">
-      <span>🔍 <strong style="color:var(--text)">Analyse</strong> — Claude breaks down the channel's strategy & growth</span>
-      <span>☆ <strong style="color:var(--text)">Save</strong> — adds to your watchlist at the top of this page</span>
-    </div>
-    <table class="niche-table" id="niche-table">
-        <thead>
-          <tr>
-            <th onclick="sortNiche('name')">Channel</th>
-            <th>Status</th>
-            <th onclick="sortNiche('subscribers')">Subscribers ↕</th>
-            <th onclick="sortNiche('views')">Monthly Views ↕</th>
-            <th onclick="sortNiche('rpm')">RPM ↕</th>
-            <th onclick="sortNiche('estimatedEarnings')">Est. Earnings ↕</th>
-            <th>Category</th>
-            <th>Analyse</th>
-            <th>Save</th>
-          </tr>
-        </thead>
-        <tbody id="niche-table-body">
-          <tr><td colspan="7">
-            <div id="niche-usage-hint" style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 20px;text-align:center">
-              <div style="font-size:40px">🔭</div>
-              <div style="font-family:var(--ui);font-size:15px;font-weight:700;color:var(--text)">Find channels in any niche</div>
-              <div style="font-size:13px;color:var(--muted);max-width:380px;line-height:1.7">Type a keyword above (e.g. <strong>dopamine</strong>, <strong>sleep habits</strong>, <strong>personal finance</strong>) and hit <strong>🔭 Find channels</strong>.<br><br>Each result row has a <strong>🔍 Analyse</strong> button — Claude will break down the channel's strategy, niche, and why it's growing. Hit <strong>☆</strong> to save any channel to your watchlist.</div>
-            </div>
-          </td></tr>
-        </tbody>
-      </table>
-      <div class="niche-pagination" id="niche-pagination" style="display:none">
-        <button class="niche-page-btn" id="niche-prev-btn" onclick="nichePage(-1)">← Previous</button>
-        <span class="niche-page-info" id="niche-page-info">Page 1</span>
-        <button class="niche-page-btn" id="niche-next-btn" onclick="nichePage(1)">Next →</button>
-      </div>
-    </div>
-    </div><!-- /niche channel finder card -->
-
-    <!-- Analysis modal -->
-    <div class="niche-analysis-modal" id="niche-modal" style="display:none" onclick="if(event.target===this)closeNicheModal()">
-      <div class="niche-analysis-inner">
-        <button class="niche-analysis-close" onclick="closeNicheModal()">✕ Close</button>
-        <div id="niche-modal-title" style="font-family:var(--ui);font-size:16px;font-weight:700;color:var(--text)"></div>
-        <div id="niche-modal-loading" class="loading" style="display:none"><div class="spinner"></div> Analysing channel with Claude…</div>
-        <div class="niche-analysis-content" id="niche-modal-content"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ════════ IDEAS PANEL ════════ -->
-  <div class="panel" id="panel-ideas">
-    <div class="page-header">
-      <div class="page-title"><span class="page-title-icon">💡</span> Video Ideas</div>
-      <div class="page-desc">Set up your channel profiles, then generate tailored ideas — one click per channel.</div>
-    </div>
-    <!-- How ideas are generated — collapsible (includes AI card) -->
-    <div style="margin-bottom:20px">
-      <button onclick="toggleIdeasDrawer()" style="display:flex;align-items:center;gap:8px;background:none;border:1px solid var(--border);border-radius:8px;padding:9px 14px;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:600;color:var(--muted);width:100%;text-align:left" id="ideas-drawer-btn">
-        <span id="ideas-drawer-arrow" style="font-size:10px;transition:transform 0.2s">▶</span>
-        ⚙️ How ideas are generated — click to view &amp; edit the AI prompt
-      </button>
-      <div id="ideas-drawer" style="display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:16px;background:var(--s2)">
-
-        <!-- AI used mini-table -->
-        <div class="ai-panel-card" style="margin-bottom:14px">
-          <div class="ai-panel-card-title">🤖 AI used in this tab</div>
-          <div class="ai-panel-rows">
-            <div class="ai-panel-row"><span class="ai-panel-task">Fetch trending &amp; outlier data</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku + vidIQ</span><span class="ai-panel-cost">~$0.001</span></div>
-            <div class="ai-panel-row"><span class="ai-panel-task">Generate 10 idea cards</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku</span><span class="ai-panel-cost">~$0.002</span></div>
-            <div class="ai-panel-row"><span class="ai-panel-task">Score ideas with keyword data</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku + vidIQ</span><span class="ai-panel-cost">~$0.001</span></div>
-          </div>
-        </div>
-
-        <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px">
-          <strong style="color:var(--text)">Step 1 — vidIQ fetch:</strong> Keywords are extracted from your channel niche and sent to vidIQ to pull <strong>8 trending</strong> + <strong>8 breakout/outlier</strong> video titles.<br>
-          <strong style="color:var(--text)">Step 2 — Idea generation:</strong> Claude Haiku receives your channel profile + those titles as inspiration signals, then generates 10 original idea cards (title, hook, format, score, angle).<br>
-          <strong style="color:var(--text)">Step 3 — vidIQ scoring:</strong> Each idea's keyword is researched via vidIQ to overlay real search volume + competition data.
-        </div>
-        <div style="margin-bottom:10px">
-          <label style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.05em;text-transform:uppercase;display:block;margin-bottom:6px">System prompt sent to Claude (editable)</label>
-          <textarea id="ideas-system-prompt-override" rows="14" style="width:100%;font-family:var(--mono);font-size:11px;line-height:1.6;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--s1);color:var(--text);resize:vertical;box-sizing:border-box" placeholder="Leave blank to use the default prompt…"></textarea>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-ghost btn-sm" onclick="resetIdeasPrompt()">↺ Reset to default</button>
-          <button class="btn btn-sm" style="background:var(--pink);color:#fff" onclick="saveIdeasPrompt()">Save prompt</button>
-          <span id="ideas-prompt-saved" style="font-size:11px;color:var(--green);display:none">✓ Saved</span>
-        </div>
-        <div style="margin-top:12px;padding:10px;background:rgba(26,111,181,0.05);border:1px solid rgba(26,111,181,0.15);border-radius:6px;font-size:11px;color:var(--muted);line-height:1.6">
-          <strong style="color:var(--text)">Available variables:</strong><br>
-          <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{channelName}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{niche}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{styleDesc}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{refChannels}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{formatInstruction}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{trendingTitles}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{outlierTitles}</code>
-        </div>
-      </div>
+    <!-- PHASE 2 -->
+    <div style="font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--pink2);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+      <span style="background:var(--pink2);color:#fff;border-radius:4px;padding:2px 7px;font-size:9px">PHASE 2</span> Script Bending — Create Individual Videos
     </div>
 
-    <!-- Channel Profiles -->
     <div class="card" style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div class="card-title" style="margin-bottom:0">Channel profiles</div>
-        <button class="btn btn-pink btn-sm" onclick="addChannelProfile()">+ Add channel</button>
+      <div class="card-title" style="margin-bottom:4px">Script Bending Workshop</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Find an indirect competitor video → extract its structural skeleton → bend it to your niche → generate topic titles.</div>
+
+      <!-- Step row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div>
+          <label>1. Select your channel / niche</label>
+          <select id="bend-channel-select" style="margin-bottom:0">
+            <option value="">— Select a channel —</option>
+          </select>
+        </div>
+        <div>
+          <label>2. Paste competitor video URL</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="bend-video-url" placeholder="https://youtube.com/watch?v=..." style="margin-bottom:0;flex:1" />
+            <button class="btn btn-pink btn-sm" onclick="fetchBendTranscript()" id="bend-fetch-btn" style="white-space:nowrap">Fetch</button>
+          </div>
+        </div>
       </div>
-      <div id="channel-profiles-list"></div>
-      <div id="no-profiles-msg" style="font-size:13px;color:var(--muted);padding:8px 0">No channel profiles yet. Add one to get started.</div>
+
+      <div id="bend-alert" class="alert" style="display:none;margin-bottom:12px"></div>
+
+      <!-- Transcript preview -->
+      <div id="bend-transcript-section" style="display:none;margin-bottom:14px">
+        <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px">Transcript fetched ✓ <span id="bend-video-title-display" style="font-weight:400;color:var(--muted)"></span></div>
+        <div id="bend-transcript-preview" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;color:var(--muted);line-height:1.7;max-height:120px;overflow-y:auto"></div>
+        <button class="btn btn-pink" style="margin-top:10px;width:100%" onclick="extractSkeletonAndBend()" id="bend-extract-btn">🧬 Extract skeleton & generate topics</button>
+      </div>
+
+      <!-- Skeleton output -->
+      <div id="bend-skeleton-section" style="display:none;margin-bottom:14px">
+        <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px">Extracted Skeleton</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px">
+            <div style="font-size:10px;font-family:var(--ui);font-weight:700;color:var(--pink2);margin-bottom:4px">HOOK FORMULA</div>
+            <div id="skeleton-hook" style="font-size:12px;color:var(--text);line-height:1.5"></div>
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px">
+            <div style="font-size:10px;font-family:var(--ui);font-weight:700;color:var(--pink2);margin-bottom:4px">BODY STRUCTURE</div>
+            <div id="skeleton-body" style="font-size:12px;color:var(--text);line-height:1.5"></div>
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px">
+            <div style="font-size:10px;font-family:var(--ui);font-weight:700;color:var(--pink2);margin-bottom:4px">CLOSING PATTERN</div>
+            <div id="skeleton-close" style="font-size:12px;color:var(--text);line-height:1.5"></div>
+          </div>
+        </div>
+        <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px">Bent Topic Titles for your niche</div>
+        <div id="bent-titles-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
     </div>
 
-    <!-- Active profile ideas -->
-    <div id="ideas-panel-content" style="display:none">
-      <div class="card" style="margin-bottom:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div class="card-title" style="margin-bottom:0">Generate ideas for <span id="active-profile-name" style="color:var(--pink2)"></span></div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <select id="ideas-panel-format" style="margin-bottom:0;font-size:12px;padding:6px 10px">
-              <option value="all">All formats</option>
-              <option value="listicle">Listicle only</option>
-              <option value="multi">Multi-topic only</option>
-            </select>
-            <button class="btn btn-pink" onclick="generateIdeasForActiveProfile()" id="ideas-panel-gen-btn">✦ Generate ideas</button>
-          </div>
+    <!-- Approved Topics Queue -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div class="card-title" style="margin-bottom:2px">Approved Topics Queue</div>
+          <div style="font-size:11px;color:var(--muted)">Approved topics ready to send to Studio. Each carries its skeleton DNA.</div>
         </div>
-        <div style="font-size:11px;color:var(--muted)">Claude analyses your niche & reference channels via vidIQ, then generates 10 ranked ideas. Click any card to send it to Studio.</div>
-        <div id="ideas-panel-alert" class="alert" style="display:none;margin-top:10px"></div>
-      </div>
-
-      <!-- Toolbar -->
-      <div id="ideas-panel-toolbar" style="display:none;margin-bottom:12px">
-        <div class="ideas-toolbar">
-          <button class="ideas-filter active" onclick="filterPanelIdeas('all',this)">All</button>
-          <button class="ideas-filter" onclick="filterPanelIdeas('listicle',this)">📋 Listicle</button>
-          <button class="ideas-filter" onclick="filterPanelIdeas('multi',this)">🎯 Multi-topic</button>
-          <button class="ideas-filter" onclick="filterPanelIdeas('saved',this)"><span class="saved-dot"></span>Saved</button>
-          <span class="ideas-count" id="ideas-panel-count"></span>
-          <button class="btn btn-ghost btn-sm" onclick="generateIdeasForActiveProfile()" style="margin-left:8px">↻ Refresh</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="queue-filter-channel" style="margin-bottom:0;font-size:12px;padding:6px 10px" onchange="renderTopicQueue()">
+            <option value="all">All channels</option>
+          </select>
         </div>
       </div>
-      <div class="ideas-grid" id="ideas-panel-grid">
-        <div class="ideas-empty">
-          <div class="ideas-empty-icon">💡</div>
-          <p>Select a channel profile above and hit <strong>Generate ideas</strong>.</p>
-        </div>
-      </div>
-
-      <!-- Idea Sessions -->
-      <div id="idea-sessions-wrap" style="display:none;margin-top:24px">
-        <div class="idea-sessions-header">
-          <div class="idea-sessions-title">📅 Saved idea sessions</div>
-          <button class="btn btn-ghost btn-xs" onclick="clearOldSessions()" style="font-size:10px">Clear old</button>
-        </div>
-        <div id="idea-sessions-list"></div>
-      </div>
-
-      <!-- Source data collapsible -->
-      <div id="source-data-section" style="display:none;margin-top:20px">
-        <button onclick="toggleSourceData()" style="display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;width:100%;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:600;color:var(--muted);text-align:left;transition:all 0.15s" id="source-data-toggle">
-          <span id="source-data-chevron" style="transition:transform 0.2s">›</span>
-          Source data — what vidIQ returned
-          <span id="source-data-summary" style="font-weight:400;margin-left:4px;color:var(--muted2)"></span>
-        </button>
-        <div id="source-data-content" style="display:none;margin-top:10px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px">
-              <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px">
-                🔥 Trending now <span style="font-weight:400;color:var(--muted)" id="trending-count"></span>
-              </div>
-              <div id="source-trending-list" style="display:flex;flex-direction:column;gap:6px"></div>
-            </div>
-            <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px">
-              <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px">
-                ⚡ Breakout hits <span style="font-weight:400;color:var(--muted)" id="outlier-count"></span>
-              </div>
-              <div id="source-outlier-list" style="display:flex;flex-direction:column;gap:6px"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div id="topic-queue-empty" style="font-size:12px;color:var(--muted2);padding:10px 0">No approved topics yet. Generate and approve topics above.</div>
+      <div id="topic-queue-list" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
   </div>
 
+  <!-- Add Watchlist Channel Modal -->
+  <div id="watchlist-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeWatchlistModal()">
+    <div style="background:var(--s1);border-radius:14px;max-width:460px;width:100%;padding:24px;position:relative">
+      <button onclick="closeWatchlistModal()" style="position:absolute;top:14px;right:14px;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:4px 10px;font-size:12px">✕</button>
+      <div style="font-family:var(--ui);font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px">Add Breakout Channel</div>
+      <label>Channel name</label>
+      <input type="text" id="wl-name" placeholder="e.g. Professor POV" />
+      <label>YouTube URL</label>
+      <input type="text" id="wl-url" placeholder="https://youtube.com/@ProfessorPOVs" />
+      <label>Category</label>
+      <select id="wl-category" style="margin-bottom:16px">
+        <option value="history">History</option>
+        <option value="military">Military / CIA / Special Forces</option>
+        <option value="true-crime">True Crime / Mafia / Gangs</option>
+        <option value="finance">Finance / Wealth</option>
+        <option value="self-help">Self-help / Productivity</option>
+        <option value="health">Health / Fitness</option>
+        <option value="other">Other</option>
+      </select>
+      <button class="btn btn-pink" style="width:100%" onclick="saveWatchlistChannel()">Add to watchlist</button>
+    </div>
+  </div>
 
+  <!-- Add My Channel Modal -->
+  <div id="my-channel-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeMyChannelModal()">
+    <div style="background:var(--s1);border-radius:14px;max-width:460px;width:100%;padding:24px;position:relative">
+      <button onclick="closeMyChannelModal()" style="position:absolute;top:14px;right:14px;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:4px 10px;font-size:12px">✕</button>
+      <div style="font-family:var(--ui);font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px">Add Your Channel</div>
+      <label>Channel name</label>
+      <input type="text" id="mc-name" placeholder="e.g. Pastel Treats" />
+      <label>Market / Niche</label>
+      <select id="mc-market" style="margin-bottom:16px">
+        <option value="gaming">Gaming</option>
+        <option value="lifestyle">Lifestyle / Vlogs</option>
+        <option value="education">Education / Science</option>
+        <option value="diy">DIY</option>
+        <option value="health">Health / Fitness</option>
+        <option value="beauty">Beauty / Fashion</option>
+        <option value="true-crime">True Crime</option>
+        <option value="finance">Finance</option>
+        <option value="tech">Tech</option>
+        <option value="real-estate">Real Estate</option>
+        <option value="self-help">Self-help</option>
+        <option value="history">History</option>
+        <option value="parenting">Parenting</option>
+        <option value="music">Music</option>
+        <option value="sports">Sports</option>
+      </select>
+      <label>Channel description / style (optional)</label>
+      <textarea id="mc-desc" placeholder="e.g. Faceless 2D science explainer with SPLAT the stickman mascot. Covers dopamine, neuroscience, psychology." style="min-height:70px;margin-bottom:16px"></textarea>
+      <button class="btn btn-pink" style="width:100%" onclick="saveMyChannel()">Add channel</button>
+    </div>
+  </div>
+
+  <!-- Validate Niche Modal -->
+  <div id="validate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeValidateModal()">
+    <div style="background:var(--s1);border-radius:14px;max-width:500px;width:100%;padding:24px;position:relative;max-height:90vh;overflow-y:auto">
+      <button onclick="closeValidateModal()" style="position:absolute;top:14px;right:14px;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:4px 10px;font-size:12px">✕</button>
+      <div style="font-family:var(--ui);font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">Validate a Niche</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Viral Channel = Proven Format × Untapped Market. Check all three before committing.</div>
+      <label>Format name</label>
+      <input type="text" id="val-format" placeholder="e.g. POV immersion / Every X Explained / Ranked levels" />
+      <label>Your target market</label>
+      <select id="val-market" style="margin-bottom:14px">
+        <option value="gaming">Gaming</option>
+        <option value="lifestyle">Lifestyle / Vlogs</option>
+        <option value="education">Education / Science</option>
+        <option value="diy">DIY</option>
+        <option value="health">Health / Fitness</option>
+        <option value="beauty">Beauty / Fashion</option>
+        <option value="true-crime">True Crime</option>
+        <option value="finance">Finance</option>
+        <option value="tech">Tech</option>
+        <option value="real-estate">Real Estate</option>
+        <option value="self-help">Self-help</option>
+        <option value="history">History</option>
+        <option value="parenting">Parenting</option>
+        <option value="music">Music</option>
+        <option value="sports">Sports</option>
+      </select>
+      <label>Your channel (optional)</label>
+      <select id="val-channel" style="margin-bottom:18px">
+        <option value="">— Not assigned yet —</option>
+      </select>
+      <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:12px">Validation Checklist</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--text)">
+          <input type="checkbox" id="val-q1" style="margin-top:2px;accent-color:var(--pink2)" />
+          <span>Is there a channel in a <strong>different market</strong> using this format with 10M+ views per video? <span style="color:var(--muted)">(Format is proven)</span></span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--text)">
+          <input type="checkbox" id="val-q2" style="margin-top:2px;accent-color:var(--pink2)" />
+          <span>Is there <strong>no channel</strong> in your chosen market already using this format? <span style="color:var(--muted)">(Market is open)</span></span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--text)">
+          <input type="checkbox" id="val-q3" style="margin-top:2px;accent-color:var(--pink2)" />
+          <span>Do you have a <strong>skill or interest advantage</strong> in this market? <span style="color:var(--muted)">(You'll last longer)</span></span>
+        </label>
+      </div>
+      <div id="val-result" style="display:none;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;font-weight:600;font-family:var(--ui)"></div>
+      <button class="btn btn-pink" style="width:100%" onclick="runValidation()">Run validation</button>
+    </div>
+  </div>
 
   <div class="panel" id="panel-gallery">
     <div class="page-header">
@@ -2083,9 +1719,9 @@ select option{background:var(--s1)}
       </div>
       <label>Model</label>
       <select id="claude-model" onchange="saveSettings();updateModelBadges()" style="margin-bottom:0">
-        <option value="claude-sonnet-4-5-20251001">claude-sonnet-4-5 (recommended)</option>
-        <option value="claude-opus-4-5-20251101">claude-opus-4-5 (smartest, slower)</option>
-        <option value="claude-haiku-4-5-20251001" selected>claude-haiku-4-5 (fastest, cheapest)</option>
+        <option value="claude-sonnet-4-5">claude-sonnet-4-5 (recommended)</option>
+        <option value="claude-opus-4-5">claude-opus-4-5 (smartest, slower)</option>
+        <option value="claude-haiku-4-5-20251001">claude-haiku-4-5 (fastest, cheapest)</option>
       </select>
     </div>
 
@@ -2124,16 +1760,6 @@ select option{background:var(--s1)}
       <div class="api-row">
         <input type="password" id="openai-whisper-key" placeholder="sk-…" oninput="saveSettings()" />
         <button class="toggle-vis" onclick="toggleVis('openai-whisper-key',this)">show</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">vidIQ — Research &amp; Keyword Data</div>
-      <div class="alert alert-info" style="margin-bottom:14px">Generate your key at <strong>vidiq.com → Account Settings → MCP tab</strong>. Enables idea generation, keyword research, and channel analysis.</div>
-      <label>API key</label>
-      <div class="api-row">
-        <input type="password" id="vidiq-key" placeholder="vidiq_…" oninput="saveSettings()" />
-        <button class="toggle-vis" onclick="toggleVis('vidiq-key',this)">show</button>
       </div>
     </div>
 
@@ -2350,7 +1976,6 @@ function loadSettings() {
   if (s.googleAIKey)  document.getElementById('openai-key').value    = s.googleAIKey;
   if (s.klingKey)     { const el = document.getElementById('kling-key'); if(el) el.value = s.klingKey; }
   if (s.openaiKey)    { const el = document.getElementById('openai-whisper-key'); if(el) el.value = s.openaiKey; }
-  if (s.vidiqKey)     { const el = document.getElementById('vidiq-key'); if(el) el.value = s.vidiqKey; }
   if (s.claudeModel)  document.getElementById('claude-model').value  = s.claudeModel;
   if (s.openaiModel)  { const el = document.getElementById('openai-model'); if(el) el.value = s.openaiModel; }
   if (s.openaiSize)   { const el = document.getElementById('openai-size'); if(el) el.value = s.openaiSize; }
@@ -2371,7 +1996,6 @@ function saveSettings() {
     googleAIKey:  document.getElementById('openai-key').value,
     klingKey:     document.getElementById('kling-key')?.value || '',
     openaiKey:    document.getElementById('openai-whisper-key')?.value || '',
-    vidiqKey:     document.getElementById('vidiq-key')?.value || '',
     claudeModel:  document.getElementById('claude-model').value,
     openaiModel:  document.getElementById('openai-model').value,
     openaiSize:   document.getElementById('openai-size')?.value || '1536x1024',
@@ -2407,17 +2031,14 @@ function updateApiStatus() {
   const gk = document.getElementById('openai-key').value.trim();
   const kk = document.getElementById('kling-key')?.value.trim();
   const wk = document.getElementById('openai-whisper-key')?.value.trim();
-  const vk = document.getElementById('vidiq-key')?.value.trim();
   document.getElementById('claude-dot').className  = 'status-dot '+(ck?'ok':'err');
   document.getElementById('gemini-dot').className  = 'status-dot '+(gk?'ok':'err');
   document.getElementById('kling-dot').className   = 'status-dot '+(kk?'ok':'err');
   document.getElementById('whisper-dot').className = 'status-dot '+(wk?'ok':'err');
-  document.getElementById('vidiq-dot').className   = 'status-dot '+(vk?'ok':'err');
   document.getElementById('claude-status-txt').textContent  = ck?'Claude ✓':'Claude (no key)';
   document.getElementById('gemini-status-txt').textContent  = gk?'Google AI ✓':'Google AI (no key)';
   document.getElementById('kling-status-txt').textContent   = kk?'Kling AI ✓':'Kling AI (no key)';
   document.getElementById('whisper-status-txt').textContent = wk?'Whisper ✓':'Whisper (no key)';
-  document.getElementById('vidiq-status-txt').textContent   = vk?'vidIQ ✓':'vidIQ (no key)';
 }
 
 function toggleVis(id, btn) {
@@ -2463,9 +2084,7 @@ function showPanel(name) {
   window.scrollTo(0,0);
   
   if (name==='gallery') renderMainGallery();
-  if (name==='branding') initBranding();
-  if (name==='niche') initNicheFinder();
-  if (name==='ideas') initIdeasPanel();
+  if (name==='ideation') initIdeation();
   if (name==='characters') initCharacterLibrary();
   if (name==='studio' && window._pendingMasterStyle) {
     const el = document.getElementById('master-style');
@@ -2700,9 +2319,13 @@ ${notes ? 'EXTRA NOTES FROM USER: '+notes : ''}`;
     ? `\nCHANNEL: ${activeProfile.name}${activeProfile.niche ? '\nNiche: '+activeProfile.niche : ''}${activeProfile.desc ? '\nStyle & audience: '+activeProfile.desc : ''}`
     : (projectChannelName ? `\nCHANNEL: ${projectChannelName}` : '');
 
+  // Inject Script Bend context if available
+  const bendCtx = window._studioScriptBendContext || null;
+  const bendSection = bendCtx ? `\n\n═══════════════════════════════════════\nSCRIPT BEND CONTEXT (APPLY THIS)\n═══════════════════════════════════════\nThis topic was bent from a viral competitor video. Use the structural skeleton below to shape your hook, body, and closing — while keeping the content 100% original for this niche.\n\nHook formula to emulate: ${bendCtx.hookFormula}\nBody structure to emulate: ${bendCtx.bodyStructure}\nClosing pattern to emulate: ${bendCtx.closingPattern}\nBend type: ${bendCtx.bendType}\nSource video: "${bendCtx.sourceTitle}"\n\nIMPORTANT: The skeleton above defines HOW you tell the story (structure, rhythm, entry point). The 6-beat formula and science content are still fully applied. Do not copy any content from the source — only its storytelling architecture.` : '';
+
   const userPrompt = channelName
-    ? `Write a YouTube script for "${channelName}" about: "${topic}"`
-    : `Write a YouTube script about: "${topic}"`;
+    ? `Write a YouTube script for "${channelName}" about: "${topic}"${bendSection}`
+    : `Write a YouTube script about: "${topic}"${bendSection}`;
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -3718,8 +3341,524 @@ function clearOldSessions() {
 }
 
 // ══════════════════════════════════════════════
-// CHANNEL PROFILES & IDEAS PANEL
 // ══════════════════════════════════════════════
+// IDEATION — NICHE BENDING + SCRIPT BENDING
+// ══════════════════════════════════════════════
+
+const MARKETS = ['Gaming','Lifestyle / Vlogs','Education / Science','DIY','Health / Fitness','Beauty / Fashion','True Crime','Finance','Tech','Real Estate','Self-help','History','Parenting','Music','Sports'];
+
+let ideationData = JSON.parse(localStorage.getItem('pt-ideation') || JSON.stringify({
+  watchlist: [],      // [{id,name,url,category}]
+  formatLibrary: [],  // [{id,name,description,example,marketUsage:[]}]
+  myChannels: [],     // [{id,name,market,desc}]
+  nicheCards: [],     // [{id,format,market,channelId,validated,createdAt}]
+  topicQueue: [],     // [{id,title,channelId,channelName,hookFormula,bodyStructure,closingPattern,bendType,sourceUrl,sourceTitle,createdAt,status}]
+}));
+
+function saveIdeation() { localStorage.setItem('pt-ideation', JSON.stringify(ideationData)); }
+
+function initIdeation() {
+  renderWatchlist();
+  renderFormatLibrary();
+  renderMyChannels();
+  renderMarketGrid();
+  renderNicheCards();
+  renderTopicQueue();
+  populateBendChannelSelect();
+  populateQueueFilterSelect();
+  populateValidateChannelSelect();
+}
+
+// ── WATCHLIST ──
+function renderWatchlist() {
+  const list = document.getElementById('watchlist-list');
+  const empty = document.getElementById('watchlist-empty');
+  if (!ideationData.watchlist.length) { empty.style.display='block'; list.innerHTML=''; return; }
+  empty.style.display='none';
+  const catLabel = {history:'History','military':'Military/CIA','true-crime':'True Crime/Mafia',finance:'Finance','self-help':'Self-help',health:'Health/Fitness',other:'Other'};
+  list.innerHTML = ideationData.watchlist.map((ch,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-family:var(--ui);font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(ch.name)}</div>
+        <div style="font-size:10px;color:var(--muted)">${catLabel[ch.category]||ch.category} · <a href="${escHtml(ch.url)}" target="_blank" style="color:var(--pink2);text-decoration:none">${escHtml(ch.url.replace('https://','').substring(0,35))}…</a></div>
+      </div>
+      <button onclick="removeWatchlistChannel(${i})" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:2px 6px" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+function openAddWatchlistModal() { document.getElementById('wl-name').value=''; document.getElementById('wl-url').value=''; document.getElementById('watchlist-modal').style.display='flex'; }
+function closeWatchlistModal() { document.getElementById('watchlist-modal').style.display='none'; }
+function saveWatchlistChannel() {
+  const name=document.getElementById('wl-name').value.trim();
+  const url=document.getElementById('wl-url').value.trim();
+  const category=document.getElementById('wl-category').value;
+  if (!name||!url) { alert('Name and URL required.'); return; }
+  ideationData.watchlist.push({id:Date.now(),name,url,category});
+  saveIdeation(); closeWatchlistModal(); renderWatchlist();
+}
+function removeWatchlistChannel(i) { ideationData.watchlist.splice(i,1); saveIdeation(); renderWatchlist(); }
+
+// ── FORMAT LIBRARY ──
+function renderFormatLibrary() {
+  const list = document.getElementById('format-library-list');
+  const empty = document.getElementById('format-library-empty');
+  if (!ideationData.formatLibrary.length) { empty.style.display='block'; list.innerHTML=''; return; }
+  empty.style.display='none';
+  list.innerHTML = ideationData.formatLibrary.map((f,i)=>`
+    <div style="padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="font-family:var(--ui);font-size:12px;font-weight:700;color:var(--text)">${escHtml(f.name)}</div>
+        <button onclick="removeFormat(${i})" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;margin-left:auto;padding:0 4px">✕</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${escHtml(f.description)}</div>
+      <div style="font-size:10px;color:var(--muted2);font-style:italic">e.g. "${escHtml(f.example)}"</div>
+      ${f.marketUsage&&f.marketUsage.length?`<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${f.marketUsage.map(m=>`<span style="font-size:9px;font-family:var(--ui);font-weight:600;padding:2px 7px;border-radius:10px;background:var(--pink-dim);color:var(--pink2)">${escHtml(m)}</span>`).join('')}</div>`:''}
+    </div>`).join('');
+  renderMarketMap();
+}
+function removeFormat(i) { ideationData.formatLibrary.splice(i,1); saveIdeation(); renderFormatLibrary(); }
+
+// ── SCAN OUTLIERS ──
+async function scanWatchlistOutliers() {
+  const claudeKey = localStorage.getItem('pt-claude-key');
+  if (!claudeKey) { showAlert('scan-alert','Add your Claude API key in Settings first.','warn'); return; }
+  if (!ideationData.watchlist.length) { showAlert('scan-alert','Add at least one channel to your watchlist first.','warn'); return; }
+  const btn = document.getElementById('scan-outliers-btn');
+  btn.disabled=true; btn.textContent='⏳ Scanning…';
+  hideAlert('scan-alert');
+  try {
+    // Pull outliers from vidIQ for each watchlist channel keyword
+    const keywords = ideationData.watchlist.map(ch=>ch.name).join(', ');
+    const vidiqKey = localStorage.getItem('pt-vidiq-key')||'';
+    let outlierTitles = [];
+    try {
+      const vidiqRes = await callClaudeVidIQ(`Find the top 10 most viral outlier videos from these YouTube channels: ${keywords}. Return only video titles and view counts.`, vidiqKey);
+      outlierTitles = vidiqRes||[];
+    } catch(e) { outlierTitles = []; }
+
+    // Ask Claude to extract format patterns
+    const prompt = `You are a YouTube niche analyst using the Niche Bending method.
+
+I run a faceless YouTube channel and I monitor these indirect competitor channels: ${ideationData.watchlist.map(ch=>`${ch.name} (${ch.category})`).join(', ')}.
+
+${outlierTitles.length ? `Recent viral video titles from these channels:\n${outlierTitles.slice(0,15).map(t=>`- ${t}`).join('\n')}` : `Channel categories: ${ideationData.watchlist.map(ch=>ch.category).join(', ')}`}
+
+Identify 5-8 distinct storytelling FORMAT PATTERNS that are currently working. For each format:
+1. Give it a short name (3-5 words)
+2. Describe the structural pattern (1-2 sentences)
+3. Give one example title using that format
+4. List which content markets have already used this format (from: Gaming, Lifestyle/Vlogs, Education/Science, DIY, Health/Fitness, Beauty/Fashion, True Crime, Finance, Tech, Real Estate, Self-help, History, Parenting, Music, Sports)
+
+Respond ONLY with valid JSON array, no markdown:
+[{"name":"Format Name","description":"How it works structurally","example":"Example title","marketUsage":["Market1","Market2"]}]`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':claudeKey,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,messages:[{role:'user',content:prompt}]})
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text||'[]';
+    const clean = text.replace(/```json|```/g,'').trim();
+    const formats = JSON.parse(clean);
+    // Merge — avoid duplicates by name
+    const existing = new Set(ideationData.formatLibrary.map(f=>f.name.toLowerCase()));
+    let added=0;
+    for (const f of formats) {
+      if (!existing.has(f.name.toLowerCase())) {
+        ideationData.formatLibrary.push({id:Date.now()+Math.random(),name:f.name,description:f.description,example:f.example,marketUsage:f.marketUsage||[]});
+        added++;
+      }
+    }
+    saveIdeation();
+    renderFormatLibrary();
+    showAlert('scan-alert',`Scan complete. ${added} new format${added!==1?'s':''} added to the library.`,'success');
+  } catch(e) {
+    showAlert('scan-alert','Scan error: '+e.message,'error');
+  } finally {
+    btn.disabled=false; btn.textContent='⚡ Scan for outlier videos';
+  }
+}
+
+// ── MY CHANNELS ──
+function renderMyChannels() {
+  const list = document.getElementById('my-channels-list');
+  const empty = document.getElementById('my-channels-empty');
+  if (!ideationData.myChannels.length) { empty.style.display='block'; list.innerHTML=''; return; }
+  empty.style.display='none';
+  list.innerHTML = ideationData.myChannels.map((ch,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-family:var(--ui);font-size:12px;font-weight:600;color:var(--text)">${escHtml(ch.name)}</div>
+        <div style="font-size:10px;color:var(--muted)">${escHtml(ch.market)}</div>
+      </div>
+      <button onclick="removeMyChannel(${i})" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:2px 6px">✕</button>
+    </div>`).join('');
+  populateBendChannelSelect();
+  populateQueueFilterSelect();
+  populateValidateChannelSelect();
+}
+function openAddChannelModal() { document.getElementById('mc-name').value=''; document.getElementById('mc-desc').value=''; document.getElementById('my-channel-modal').style.display='flex'; }
+function closeMyChannelModal() { document.getElementById('my-channel-modal').style.display='none'; }
+function saveMyChannel() {
+  const name=document.getElementById('mc-name').value.trim();
+  const market=document.getElementById('mc-market').value;
+  const desc=document.getElementById('mc-desc').value.trim();
+  if (!name) { alert('Channel name required.'); return; }
+  ideationData.myChannels.push({id:Date.now(),name,market,desc});
+  saveIdeation(); closeMyChannelModal(); renderMyChannels();
+}
+function removeMyChannel(i) { ideationData.myChannels.splice(i,1); saveIdeation(); renderMyChannels(); }
+
+// ── MARKET GRID ──
+function renderMarketGrid() {
+  const grid = document.getElementById('market-grid');
+  const usedMarkets = new Set(ideationData.myChannels.map(ch=>ch.market.toLowerCase()));
+  grid.innerHTML = MARKETS.map(m=>{
+    const key = m.toLowerCase();
+    const isYours = [...usedMarkets].some(u=>u.includes(key.split('/')[0].trim()));
+    return `<span style="font-size:10px;font-family:var(--ui);font-weight:600;padding:4px 10px;border-radius:12px;border:1px solid ${isYours?'var(--pink-border)':'var(--border)'};background:${isYours?'var(--pink-dim)':'var(--s2)'};color:${isYours?'var(--pink2)':'var(--muted)'}">
+      ${isYours?'✓ ':''}${escHtml(m)}
+    </span>`;
+  }).join('');
+}
+
+// ── MARKET MAP TABLE ──
+function renderMarketMap() {
+  const tableWrap = document.getElementById('market-map-table');
+  const empty = document.getElementById('market-map-empty');
+  if (!ideationData.formatLibrary.length) { tableWrap.style.display='none'; empty.style.display='block'; return; }
+  empty.style.display='none'; tableWrap.style.display='block';
+  const formats = ideationData.formatLibrary;
+  const myMarkets = ideationData.myChannels.map(ch=>ch.market);
+  tableWrap.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:10px;min-width:400px">
+    <thead><tr style="background:var(--s2)">
+      <th style="padding:6px 8px;text-align:left;font-family:var(--ui);font-weight:700;color:var(--muted);border:1px solid var(--border)">Format</th>
+      ${MARKETS.map(m=>`<th style="padding:4px 6px;font-family:var(--ui);font-weight:600;color:var(--muted);border:1px solid var(--border);white-space:nowrap;writing-mode:vertical-rl;transform:rotate(180deg);height:70px">${escHtml(m.split('/')[0].trim())}</th>`).join('')}
+    </tr></thead>
+    <tbody>${formats.map(f=>`<tr>
+      <td style="padding:6px 8px;font-family:var(--ui);font-weight:600;color:var(--text);border:1px solid var(--border);white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis" title="${escHtml(f.name)}">${escHtml(f.name)}</td>
+      ${MARKETS.map(m=>{
+        const used = (f.marketUsage||[]).some(u=>u.toLowerCase().includes(m.split('/')[0].trim().toLowerCase()));
+        const isYours = myMarkets.some(my=>my.toLowerCase().includes(m.split('/')[0].trim().toLowerCase()));
+        if (used) return `<td style="text-align:center;padding:4px;border:1px solid var(--border);background:rgba(99,102,241,0.12)">✓</td>`;
+        if (isYours) return `<td style="text-align:center;padding:4px;border:1px solid var(--border);background:rgba(236,72,153,0.12)" title="Opportunity for your channel!">⭐</td>`;
+        return `<td style="text-align:center;padding:4px;border:1px solid var(--border);color:var(--muted2)">–</td>`;
+      }).join('')}
+    </tr>`).join('')}</tbody>
+  </table>
+  <div style="margin-top:8px;font-size:10px;color:var(--muted);display:flex;gap:14px">
+    <span>✓ Already used in this market</span>
+    <span>⭐ Your market — opportunity slot</span>
+    <span>– Unused / open</span>
+  </div>`;
+}
+
+// ── VALIDATE ──
+function openValidateModal() {
+  document.getElementById('val-format').value='';
+  document.getElementById('val-q1').checked=false;
+  document.getElementById('val-q2').checked=false;
+  document.getElementById('val-q3').checked=false;
+  document.getElementById('val-result').style.display='none';
+  document.getElementById('validate-modal').style.display='flex';
+}
+function closeValidateModal() { document.getElementById('validate-modal').style.display='none'; }
+function populateValidateChannelSelect() {
+  const sel = document.getElementById('val-channel');
+  if (!sel) return;
+  sel.innerHTML='<option value="">— Not assigned yet —</option>'+ideationData.myChannels.map(ch=>`<option value="${ch.id}">${escHtml(ch.name)}</option>`).join('');
+}
+function runValidation() {
+  const format = document.getElementById('val-format').value.trim();
+  const market = document.getElementById('val-market').value;
+  const channelId = document.getElementById('val-channel').value;
+  const q1 = document.getElementById('val-q1').checked;
+  const q2 = document.getElementById('val-q2').checked;
+  const q3 = document.getElementById('val-q3').checked;
+  if (!format) { alert('Enter a format name.'); return; }
+  const result = document.getElementById('val-result');
+  result.style.display='block';
+  const allPassed = q1&&q2&&q3;
+  const passed = [q1,q2,q3].filter(Boolean).length;
+  if (allPassed) {
+    result.style.background='rgba(16,185,129,0.1)';
+    result.style.border='1px solid rgba(16,185,129,0.3)';
+    result.style.color='#10b981';
+    result.innerHTML='✅ Validated! All three boxes checked — this is a strong niche opportunity. Saving as a Niche Card.';
+    const ch = ideationData.myChannels.find(c=>c.id==channelId);
+    ideationData.nicheCards.push({id:Date.now(),format,market,channelId:channelId||null,channelName:ch?ch.name:null,validated:true,checks:{q1,q2,q3},createdAt:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})});
+    saveIdeation();
+    setTimeout(()=>{ closeValidateModal(); renderNicheCards(); },1200);
+  } else {
+    result.style.background='rgba(239,68,68,0.08)';
+    result.style.border='1px solid rgba(239,68,68,0.2)';
+    result.style.color='#ef4444';
+    result.innerHTML=`⚠️ ${passed}/3 checks passed. ${!q1?'No proven format with 10M+ views found. ':''}${!q2?'This market may already have a competitor using this format. ':''}${!q3?'Consider whether you have a lasting advantage in this market.':''}`;
+  }
+}
+function renderNicheCards() {
+  const list = document.getElementById('niche-cards-list');
+  const empty = document.getElementById('niche-cards-empty');
+  if (!ideationData.nicheCards.length) { empty.style.display='block'; list.innerHTML=''; return; }
+  empty.style.display='none';
+  list.innerHTML = ideationData.nicheCards.map((nc,i)=>`
+    <div style="background:linear-gradient(135deg,var(--s2),var(--s1));border:1px solid var(--pink-border);border-radius:10px;padding:14px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:9px;font-family:var(--ui);font-weight:700;letter-spacing:0.08em;color:var(--pink2);text-transform:uppercase">Validated Niche</div>
+        <button onclick="removeNicheCard(${i})" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px">✕</button>
+      </div>
+      <div style="font-family:var(--ui);font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px">${escHtml(nc.format)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Market: ${escHtml(nc.market)}${nc.channelName?' · Channel: '+escHtml(nc.channelName):''}</div>
+      <div style="font-size:10px;color:var(--muted2)">${nc.createdAt}</div>
+    </div>`).join('');
+}
+function removeNicheCard(i) { if(confirm('Remove this niche card?')){ ideationData.nicheCards.splice(i,1); saveIdeation(); renderNicheCards(); } }
+
+// ── SCRIPT BENDING ──
+function populateBendChannelSelect() {
+  const sel = document.getElementById('bend-channel-select');
+  if (!sel) return;
+  sel.innerHTML='<option value="">— Select a channel —</option>'+ideationData.myChannels.map(ch=>`<option value="${ch.id}">${escHtml(ch.name)} (${escHtml(ch.market)})</option>`).join('');
+}
+
+async function fetchBendTranscript() {
+  const url = document.getElementById('bend-video-url').value.trim();
+  const claudeKey = localStorage.getItem('pt-claude-key');
+  const vidiqKey = localStorage.getItem('pt-vidiq-key')||'';
+  if (!url) { showAlert('bend-alert','Paste a YouTube video URL.','warn'); return; }
+  if (!claudeKey) { showAlert('bend-alert','Add your Claude API key in Settings.','warn'); return; }
+  const btn = document.getElementById('bend-fetch-btn');
+  btn.disabled=true; btn.textContent='⏳';
+  hideAlert('bend-alert');
+  document.getElementById('bend-transcript-section').style.display='none';
+  document.getElementById('bend-skeleton-section').style.display='none';
+  try {
+    // Extract video ID
+    const vidId = url.match(/(?:v=|youtu\.be\/|\/shorts\/)([a-zA-Z0-9_-]{11})/)?.[1];
+    if (!vidId) throw new Error('Could not extract video ID from URL. Use a standard YouTube URL.');
+    let transcript = '';
+    let videoTitle = '';
+    // Try vidIQ transcript
+    try {
+      const transcriptRes = await callClaudeVidIQ(`Get the full transcript for YouTube video ID: ${vidId}. URL: ${url}`, vidiqKey);
+      if (transcriptRes && typeof transcriptRes === 'string' && transcriptRes.length > 100) {
+        transcript = transcriptRes.substring(0,4000);
+      }
+    } catch(e) {}
+    // Try fetching title from oEmbed
+    try {
+      const oEmbed = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+      const oe = await oEmbed.json();
+      videoTitle = oe.title||'';
+    } catch(e) {}
+    // If no transcript, use title-based analysis
+    if (!transcript) {
+      transcript = `[Transcript unavailable — analysing from title and video metadata only]\nVideo title: ${videoTitle||url}\nVideo ID: ${vidId}`;
+    }
+    // Store for use in bend
+    window._bendTranscript = transcript;
+    window._bendVideoTitle = videoTitle||url;
+    window._bendVideoUrl = url;
+    window._bendVideoId = vidId;
+    // Show preview
+    document.getElementById('bend-video-title-display').textContent = videoTitle ? `"${videoTitle}"` : '';
+    document.getElementById('bend-transcript-preview').textContent = transcript.substring(0,600)+(transcript.length>600?'…':'');
+    document.getElementById('bend-transcript-section').style.display='block';
+  } catch(e) {
+    showAlert('bend-alert','Error: '+e.message,'error');
+  } finally {
+    btn.disabled=false; btn.textContent='Fetch';
+  }
+}
+
+async function extractSkeletonAndBend() {
+  const channelId = document.getElementById('bend-channel-select').value;
+  const claudeKey = localStorage.getItem('pt-claude-key');
+  if (!channelId) { showAlert('bend-alert','Select your channel first.','warn'); return; }
+  if (!window._bendTranscript) { showAlert('bend-alert','Fetch a video first.','warn'); return; }
+  const ch = ideationData.myChannels.find(c=>c.id==channelId);
+  if (!ch) return;
+  const btn = document.getElementById('bend-extract-btn');
+  btn.disabled=true; btn.textContent='⏳ Extracting & generating…';
+  hideAlert('bend-alert');
+  try {
+    const prompt = `You are a YouTube Script Bending analyst.
+
+VIDEO TO ANALYSE:
+Title: ${window._bendVideoTitle}
+Transcript/Content:
+${window._bendTranscript}
+
+MY CHANNEL:
+Name: ${ch.name}
+Market: ${ch.market}
+${ch.desc?'Description: '+ch.desc:''}
+
+TASK:
+1. Extract the structural skeleton of the source video:
+   - Hook formula: the exact pattern of the opening (e.g. "From X to Y to Z — this is how every [topic] [outcome]")
+   - Body structure: how is it organised? (ranked list / POV immersion / chronological stages / compilation of distinct topics / before-after)
+   - Closing pattern: how does it end? (paradox / callback / CTA / revelation)
+
+2. Generate 6-8 bent topic titles for my channel (${ch.market} market), using the SAME structural skeleton but applied to my niche. Titles should be ready-to-use YouTube video titles — not concepts, actual titles.
+
+3. For each title, classify the bend type: Niche Swap / Format Transplant / Hype Injection / Angle Flip
+
+Respond ONLY with valid JSON, no markdown:
+{
+  "hookFormula": "the extracted hook pattern",
+  "bodyStructure": "how the body is organised",
+  "closingPattern": "how it closes",
+  "bentTitles": [
+    {"title": "YouTube title here", "bendType": "Format Transplant"},
+    ...
+  ]
+}`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':claudeKey,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-5-20251001',max_tokens:1500,messages:[{role:'user',content:prompt}]})
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text||'{}';
+    const clean = text.replace(/```json|```/g,'').trim();
+    const result = JSON.parse(clean);
+    // Render skeleton
+    document.getElementById('skeleton-hook').textContent = result.hookFormula||'—';
+    document.getElementById('skeleton-body').textContent = result.bodyStructure||'—';
+    document.getElementById('skeleton-close').textContent = result.closingPattern||'—';
+    // Store skeleton for topic saving
+    window._bendSkeleton = result;
+    window._bendChannelId = channelId;
+    window._bendChannelName = ch.name;
+    // Render titles
+    const bendTypeColor = {'Format Transplant':'#10b981','Hype Injection':'#f59e0b','Niche Swap':'#6366f1','Angle Flip':'#ec4899'};
+    const titles = result.bentTitles||[];
+    document.getElementById('bent-titles-list').innerHTML = titles.map((t,i)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px" id="bent-title-${i}">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text);font-family:var(--ui);margin-bottom:3px">${escHtml(t.title)}</div>
+          <span style="font-size:9px;font-weight:700;font-family:var(--ui);padding:2px 7px;border-radius:8px;background:${bendTypeColor[t.bendType]||'#6366f1'}22;color:${bendTypeColor[t.bendType]||'#6366f1'}">${escHtml(t.bendType)}</span>
+        </div>
+        <button class="btn btn-pink btn-sm" onclick="approveBentTitle(${i})" style="white-space:nowrap">✓ Approve</button>
+      </div>`).join('');
+    document.getElementById('bend-skeleton-section').style.display='block';
+  } catch(e) {
+    showAlert('bend-alert','Error: '+e.message,'error');
+  } finally {
+    btn.disabled=false; btn.textContent='🧬 Extract skeleton & generate topics';
+  }
+}
+
+function approveBentTitle(i) {
+  const skeleton = window._bendSkeleton;
+  const titles = skeleton?.bentTitles||[];
+  const t = titles[i];
+  if (!t) return;
+  const topic = {
+    id: Date.now()+i,
+    title: t.title,
+    bendType: t.bendType,
+    channelId: window._bendChannelId,
+    channelName: window._bendChannelName,
+    hookFormula: skeleton.hookFormula,
+    bodyStructure: skeleton.bodyStructure,
+    closingPattern: skeleton.closingPattern,
+    sourceUrl: window._bendVideoUrl,
+    sourceTitle: window._bendVideoTitle,
+    createdAt: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+    status: 'approved'
+  };
+  ideationData.topicQueue.unshift(topic);
+  saveIdeation();
+  // Visual feedback
+  const el = document.getElementById(`bent-title-${i}`);
+  if (el) { el.style.opacity='0.5'; el.querySelector('button').textContent='✓ Approved'; el.querySelector('button').disabled=true; }
+  renderTopicQueue();
+  populateQueueFilterSelect();
+}
+
+// ── TOPIC QUEUE ──
+function populateQueueFilterSelect() {
+  const sel = document.getElementById('queue-filter-channel');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML='<option value="all">All channels</option>'+ideationData.myChannels.map(ch=>`<option value="${ch.id}">${escHtml(ch.name)}</option>`).join('');
+  sel.value = current||'all';
+}
+
+function renderTopicQueue() {
+  const list = document.getElementById('topic-queue-list');
+  const empty = document.getElementById('topic-queue-empty');
+  const filterCh = document.getElementById('queue-filter-channel')?.value||'all';
+  let topics = ideationData.topicQueue;
+  if (filterCh!=='all') topics = topics.filter(t=>t.channelId==filterCh);
+  if (!topics.length) { empty.style.display='block'; list.innerHTML=''; return; }
+  empty.style.display='none';
+  const bendTypeColor = {'Format Transplant':'#10b981','Hype Injection':'#f59e0b','Niche Swap':'#6366f1','Angle Flip':'#ec4899'};
+  list.innerHTML = topics.map((t,i)=>`
+    <div style="padding:12px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px">
+        <div style="flex:1">
+          <div style="font-family:var(--ui);font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">${escHtml(t.title)}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+            <span style="font-size:9px;font-weight:700;font-family:var(--ui);padding:2px 7px;border-radius:8px;background:${bendTypeColor[t.bendType]||'#6366f1'}22;color:${bendTypeColor[t.bendType]||'#6366f1'}">${escHtml(t.bendType||'')}</span>
+            <span style="font-size:10px;color:var(--muted)">${escHtml(t.channelName||'')} · ${t.createdAt}</span>
+          </div>
+          <div style="font-size:10px;color:var(--muted2);margin-top:4px">Source: <a href="${escHtml(t.sourceUrl)}" target="_blank" style="color:var(--pink2);text-decoration:none">${escHtml(t.sourceTitle||t.sourceUrl)}</a></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;min-width:100px">
+          <button class="btn btn-pink btn-sm" onclick="sendTopicToStudio(${ideationData.topicQueue.indexOf(t)})" style="white-space:nowrap">→ Studio</button>
+          <button onclick="removeTopicFromQueue(${ideationData.topicQueue.indexOf(t)})" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:11px;padding:4px 8px">Remove</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:6px 8px">
+          <div style="font-size:9px;font-family:var(--ui);font-weight:700;color:var(--pink2);margin-bottom:2px">HOOK</div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.4">${escHtml(t.hookFormula||'—')}</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:6px 8px">
+          <div style="font-size:9px;font-family:var(--ui);font-weight:700;color:var(--pink2);margin-bottom:2px">BODY</div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.4">${escHtml(t.bodyStructure||'—')}</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:6px 8px">
+          <div style="font-size:9px;font-family:var(--ui);font-weight:700;color:var(--pink2);margin-bottom:2px">CLOSE</div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.4">${escHtml(t.closingPattern||'—')}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function removeTopicFromQueue(i) {
+  ideationData.topicQueue.splice(i,1);
+  saveIdeation(); renderTopicQueue();
+}
+
+function sendTopicToStudio(i) {
+  const t = ideationData.topicQueue[i];
+  if (!t) return;
+  // Pre-load topic into studio step 1
+  showPanel('studio');
+  setTimeout(()=>{
+    const topicEl = document.getElementById('topic');
+    if (topicEl) topicEl.value = t.title;
+    // Store skeleton for script prompt injection
+    window._studioScriptBendContext = {
+      hookFormula: t.hookFormula,
+      bodyStructure: t.bodyStructure,
+      closingPattern: t.closingPattern,
+      bendType: t.bendType,
+      sourceTitle: t.sourceTitle
+    };
+    // Show a small indicator
+    const alertEl = document.getElementById('step1-alert');
+    if (alertEl) { alertEl.style.display='block'; alertEl.className='alert alert-info'; alertEl.textContent=`Script Bend loaded: "${t.sourceTitle}" → ${t.bendType}`; }
+  }, 300);
+}
+
+// CHANNEL PROFILES & IDEAS PANEL (legacy — kept for Studio channel select)
 let channelProfiles = JSON.parse(localStorage.getItem('pt-channel-profiles') || '[]');
 let activeProfileIdx = parseInt(localStorage.getItem('pt-active-profile') || '0');
 let editingProfileIdx = null;
@@ -3931,14 +4070,26 @@ async function scoreIdeasWithVidIQ(ideas, claudeKey) {
   }
 }
 
-const DEFAULT_IDEAS_SYSTEM_PROMPT = `You are a YouTube content strategist. Generate video idea cards for this specific channel.
+async function generateIdeaCardsForProfile(trending, outliers, profile, formatFilter, claudeKey) {
+  const trendingTitles = trending.slice(0,8).map(v=>v.title||v.videoTitle||'').filter(Boolean);
+  const outlierTitles  = outliers.slice(0,8).map(v=>v.title||v.videoTitle||'').filter(Boolean);
+
+  const formatInstruction = formatFilter==='listicle'
+    ? 'All ideas must be listicle format (e.g. "7 habits destroying your focus").'
+    : formatFilter==='multi'
+    ? 'All ideas must be multi-topic compilation format.'
+    : 'Mix of listicle and multi-topic compilation formats.';
+
+  const refLine = profile.refs?.length ? `Reference/competitor channels: ${profile.refs.join(', ')}` : '';
+
+  const systemPrompt = `You are a YouTube content strategist. Generate video idea cards for this specific channel.
 
 CHANNEL PROFILE:
-- Name: {channelName}
-- Niche: {niche}
-- Style & audience: {styleDesc}
-- Reference/competitor channels: {refChannels}
-- Format: {formatInstruction}
+- Name: ${profile.name}
+- Niche: ${profile.niche}
+${profile.desc ? '- Style & audience: '+profile.desc : ''}
+${refLine}
+- Format: ${formatInstruction}
 
 Use the trending and breakout video titles below as signals. Generate ORIGINAL ideas — not copies.
 
@@ -3952,66 +4103,6 @@ Return ONLY a valid JSON array of exactly 10 objects:
   "angle": "what makes this fresh",
   "dataSource": "trending" or "outlier" or "original"
 }`;
-
-function toggleIdeasDrawer() {
-  const drawer = document.getElementById('ideas-drawer');
-  const arrow  = document.getElementById('ideas-drawer-arrow');
-  const open   = drawer.style.display === 'block';
-  drawer.style.display = open ? 'none' : 'block';
-  arrow.style.transform = open ? '' : 'rotate(90deg)';
-  if (!open) loadIdeasPromptIntoDrawer();
-}
-
-function loadIdeasPromptIntoDrawer() {
-  const saved = localStorage.getItem('pt-ideas-system-prompt') || '';
-  const ta = document.getElementById('ideas-system-prompt-override');
-  if (ta) ta.value = saved || DEFAULT_IDEAS_SYSTEM_PROMPT;
-}
-
-function saveIdeasPrompt() {
-  const val = document.getElementById('ideas-system-prompt-override').value.trim();
-  if (val && val !== DEFAULT_IDEAS_SYSTEM_PROMPT) {
-    localStorage.setItem('pt-ideas-system-prompt', val);
-  } else {
-    localStorage.removeItem('pt-ideas-system-prompt');
-  }
-  const saved = document.getElementById('ideas-prompt-saved');
-  saved.style.display = 'inline';
-  setTimeout(() => saved.style.display = 'none', 2000);
-}
-
-function resetIdeasPrompt() {
-  localStorage.removeItem('pt-ideas-system-prompt');
-  document.getElementById('ideas-system-prompt-override').value = DEFAULT_IDEAS_SYSTEM_PROMPT;
-  const saved = document.getElementById('ideas-prompt-saved');
-  saved.style.display = 'inline';
-  setTimeout(() => saved.style.display = 'none', 2000);
-}
-
-function getIdeasSystemPrompt(profile, formatInstruction, trendingTitles, outlierTitles) {
-  const saved = localStorage.getItem('pt-ideas-system-prompt');
-  const template = saved || DEFAULT_IDEAS_SYSTEM_PROMPT;
-  return template
-    .replace(/{channelName}/g, profile.name || '')
-    .replace(/{niche}/g, profile.niche || '')
-    .replace(/{styleDesc}/g, profile.desc || '')
-    .replace(/{refChannels}/g, profile.refs?.join(', ') || '')
-    .replace(/{formatInstruction}/g, formatInstruction)
-    .replace(/{trendingTitles}/g, trendingTitles.map((t,i)=>`${i+1}. ${t}`).join('\n') || '(none)')
-    .replace(/{outlierTitles}/g, outlierTitles.map((t,i)=>`${i+1}. ${t}`).join('\n') || '(none)');
-}
-
-async function generateIdeaCardsForProfile(trending, outliers, profile, formatFilter, claudeKey) {
-  const trendingTitles = trending.slice(0,8).map(v=>v.title||v.videoTitle||'').filter(Boolean);
-  const outlierTitles  = outliers.slice(0,8).map(v=>v.title||v.videoTitle||'').filter(Boolean);
-
-  const formatInstruction = formatFilter==='listicle'
-    ? 'All ideas must be listicle format (e.g. "7 habits destroying your focus").'
-    : formatFilter==='multi'
-    ? 'All ideas must be multi-topic compilation format.'
-    : 'Mix of listicle and multi-topic compilation formats.';
-
-  const systemPrompt = getIdeasSystemPrompt(profile, formatInstruction, trendingTitles, outlierTitles);
 
   const userPrompt = `Trending now:\n${trendingTitles.map((t,i)=>`${i+1}. ${t}`).join('\n')||'(none)'}\n\nBreakout videos:\n${outlierTitles.map((t,i)=>`${i+1}. ${t}`).join('\n')||'(none)'}\n\nGenerate 10 ideas.`;
 
@@ -5653,8 +5744,8 @@ function createChannelFromBend(niche) {
   channelProfiles.push({ name: niche+' Channel', niche, desc:'', refs:[], createdAt:Date.now() });
   saveChannelProfiles();
   closeNicheBendModal();
-  showPanel('ideas');
-  initIdeasPanel();
+  // legacy niche bend — panel removed
+  // initIdeasPanel removed
 }
 
 function initNicheFinder() {
@@ -7656,27 +7747,24 @@ async function callGeminiImage(prompt, apiKey, model, refB64, refMime) {
 // ── Claude + vidIQ MCP ──
 async function callClaudeVidIQ(claudeKey, userMessage) {
   if (!claudeKey) throw new Error('No Claude API key set. Add it in Settings.');
-  const model = 'claude-haiku-4-5-20251001';
-  const vidiqKey = (function() {
-    const s = JSON.parse(localStorage.getItem('pt-settings') || '{}');
-    return s.vidiqKey || document.getElementById('vidiq-key')?.value || '';
-  })();
-  const mcpServer = { type: 'url', url: 'https://mcp.vidiq.com/mcp', name: 'vidiq' };
-  if (vidiqKey) mcpServer.authorization_token = vidiqKey;
+  const model = document.getElementById('claude-model')?.value || 'claude-sonnet-4-5';
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': claudeKey,
       'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-      'anthropic-beta': 'mcp-client-2025-04-04'
+      'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
       model,
       max_tokens: 4096,
       messages: [{ role: 'user', content: userMessage }],
-      mcp_servers: [mcpServer]
+      mcp_servers: [{
+        type: 'url',
+        url: 'https://mcp.vidiq.com/mcp',
+        name: 'vidiq'
+      }]
     })
   });
 
