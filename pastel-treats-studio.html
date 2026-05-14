@@ -1491,7 +1491,10 @@ select option{background:var(--s1)}
 
         <!-- Format × Market mapping -->
         <div>
-          <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px">Format × Market Map</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text)">Format × Market Map</div>
+            <button onclick="renderMarketMap()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:10px;padding:3px 8px;font-family:var(--ui)">↻ Refresh</button>
+          </div>
           <div id="market-map-empty" style="font-size:12px;color:var(--muted2);padding:6px 0">Scan channels to build the format library first.</div>
           <div id="market-map-table" style="display:none;overflow-x:auto"></div>
         </div>
@@ -1597,13 +1600,21 @@ select option{background:var(--s1)}
       <input type="text" id="wl-url" placeholder="https://youtube.com/@ProfessorPOVs" />
       <label>Category</label>
       <select id="wl-category" style="margin-bottom:16px">
-        <option value="history">History</option>
-        <option value="military">Military / CIA / Special Forces</option>
-        <option value="true-crime">True Crime / Mafia / Gangs</option>
-        <option value="finance">Finance / Wealth</option>
-        <option value="self-help">Self-help / Productivity</option>
-        <option value="health">Health / Fitness</option>
-        <option value="other">Other</option>
+        <option value="Gaming">Gaming</option>
+        <option value="Lifestyle / Vlogs">Lifestyle / Vlogs</option>
+        <option value="Education / Science">Education / Science</option>
+        <option value="DIY">DIY</option>
+        <option value="Health / Fitness">Health / Fitness</option>
+        <option value="Beauty / Fashion">Beauty / Fashion</option>
+        <option value="True Crime">True Crime</option>
+        <option value="Finance">Finance</option>
+        <option value="Tech">Tech</option>
+        <option value="Real Estate">Real Estate</option>
+        <option value="Self-help">Self-help</option>
+        <option value="History">History</option>
+        <option value="Parenting">Parenting</option>
+        <option value="Music">Music</option>
+        <option value="Sports">Sports</option>
       </select>
       <button class="btn btn-pink" style="width:100%" onclick="saveWatchlistChannel()">Add to watchlist</button>
     </div>
@@ -3375,12 +3386,11 @@ function renderWatchlist() {
   const empty = document.getElementById('watchlist-empty');
   if (!ideationData.watchlist.length) { empty.style.display='block'; list.innerHTML=''; return; }
   empty.style.display='none';
-  const catLabel = {history:'History','military':'Military/CIA','true-crime':'True Crime/Mafia',finance:'Finance','self-help':'Self-help',health:'Health/Fitness',other:'Other'};
   list.innerHTML = ideationData.watchlist.map((ch,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
       <div style="flex:1;min-width:0">
         <div style="font-family:var(--ui);font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(ch.name)}</div>
-        <div style="font-size:10px;color:var(--muted)">${catLabel[ch.category]||ch.category} · <a href="${escHtml(ch.url)}" target="_blank" style="color:var(--pink2);text-decoration:none">${escHtml(ch.url.replace('https://','').substring(0,35))}…</a></div>
+        <div style="font-size:10px;color:var(--muted)">${escHtml(ch.category)} · <a href="${escHtml(ch.url)}" target="_blank" style="color:var(--pink2);text-decoration:none">${escHtml(ch.url.replace('https://','').substring(0,35))}…</a></div>
       </div>
       <button onclick="removeWatchlistChannel(${i})" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:2px 6px" title="Remove">✕</button>
     </div>`).join('');
@@ -3424,8 +3434,9 @@ async function scanWatchlistOutliers() {
   if (!claudeKey) { showAlert('scan-alert','Add your Claude API key in Settings first.','warn'); return; }
   if (!ideationData.watchlist.length) { showAlert('scan-alert','Add at least one channel to your watchlist first.','warn'); return; }
   const btn = document.getElementById('scan-outliers-btn');
-  btn.disabled=true; btn.textContent='\u23f3 Scanning\u2026';
+  btn.disabled=true; btn.textContent='Scanning...';
   hideAlert('scan-alert');
+
   let outlierResultsEl = document.getElementById('scan-outlier-results');
   if (!outlierResultsEl) {
     outlierResultsEl = document.createElement('div');
@@ -3434,114 +3445,147 @@ async function scanWatchlistOutliers() {
     const alertEl = document.getElementById('scan-alert');
     alertEl.parentNode.insertBefore(outlierResultsEl, alertEl);
   }
-  outlierResultsEl.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">Fetching outlier videos from vidIQ\u2026</div>';
-  try {
-    let rawOutliers = [];
-    try {
-      const vidiqRes = await callClaudeVidIQ(claudeKey, `Use vidiq_outliers to find top breakout videos. keyword="${ideationData.watchlist.map(ch=>ch.category).join(' ')}", contentType="long", limit=15. For each video return: title, channel name, view count, video ID, thumbnail URL.`);
-      const toolResults = vidiqRes?.toolResults||[];
-      const textBlocks = vidiqRes?.textBlocks||[];
-      // Parse tool results using correct block structure
-      for (const block of toolResults) {
-        const txt = block.content?.[0]?.text||'';
-        if (!txt) continue;
-        try {
-          const parsed = JSON.parse(txt);
-          const videos = parsed.videos||parsed.results||parsed.data||parsed.outliers||(Array.isArray(parsed)?parsed:null);
-          if (Array.isArray(videos)&&videos.length) {
-            rawOutliers = videos.map(v=>({
-              title:v.title||v.videoTitle||v.name||'',
-              channel:v.channel_title||v.channel||v.channelTitle||v.channelName||'',
-              views:v.views||v.view_count||v.viewCount||0,
-              videoId:v.video_id||v.videoId||v.id||'',
-              thumbnail:v.thumbnail||v.thumbnail_url||v.thumbnailUrl||''
-            })).filter(v=>v.title);
-            break;
-          }
-        } catch(e) {}
-      }
-      // Fallback: parse text blocks for video titles/channels
-      if (!rawOutliers.length) {
-        const text = textBlocks.map(b=>b.text||'').join('\n');
-        if (text) {
-          const lines = text.split('\n').filter(l=>l.trim().length>10&&!l.startsWith('#'));
-          rawOutliers = lines.slice(0,12).map(l=>{
-            const viewMatch = l.match(/([\d,.]+[KkMm]?)\s*(?:views?)/i);
-            const views = viewMatch ? viewMatch[1] : '';
-            return {title:l.replace(/^[-\d.*•]\s*/,'').replace(/\(.*?\)/g,'').trim(),channel:'',views:0,viewsLabel:views,videoId:'',thumbnail:''};
-          }).filter(v=>v.title.length>5);
-        }
-      }
-    } catch(e) { rawOutliers=[]; }
+  outlierResultsEl.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">Fetching outlier videos from vidIQ...</div>';
 
+  try {
+    // Use the proven fetchIdeasOutliers function
+    let rawOutliers = [];
+    const keywords = ideationData.watchlist.map(ch => ch.name + ' ' + ch.category).join(' ');
+    try {
+      const videos = await fetchIdeasOutliers(keywords, claudeKey);
+      rawOutliers = videos.map(v => ({
+        title:     v.title || v.videoTitle || v.name || '',
+        channel:   v.channelTitle || v.channel || v.channelName || '',
+        views:     v.views || v.viewCount || v.view_count || 0,
+        videoId:   v.videoId || v.video_id || v.id || '',
+        thumbnail: v.thumbnailUrl || v.thumbnail || ''
+      })).filter(v => v.title);
+    } catch(e) { rawOutliers = []; }
+
+    // Render video cards using DOM (avoids template literal escaping issues)
     if (rawOutliers.length) {
-      outlierResultsEl.innerHTML = `
-        <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px">
-          Outlier Videos Found <span style="font-weight:400;color:var(--muted2)">(${rawOutliers.length} videos)</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
-          ${rawOutliers.map(v=>{
-            const ytId = v.videoId;
-            const thumbUrl = v.thumbnail||(ytId?`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`:'');
-            const videoUrl = ytId?`https://youtube.com/watch?v=${ytId}`:'#';
-            const views = v.views?(v.views>=1000000?(v.views/1000000).toFixed(1)+'M':v.views>=1000?(v.views/1000).toFixed(0)+'K':v.views):(v.viewsLabel||'');
-            const safeTitle = escHtml(v.title);
-            const safeChannel = escHtml(v.channel||'');
-            const safeUrl = escHtml(videoUrl);
-            return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
-              ${thumbUrl?`<a href="${videoUrl}" target="_blank" style="flex-shrink:0"><img src="${thumbUrl}" style="width:80px;height:45px;object-fit:cover;border-radius:4px;display:block" onerror="this.parentElement.innerHTML='<div style=\'width:80px;height:45px;background:var(--s3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px\'>\u{1F4F9}</div>'" /></a>`:`<div style="width:80px;height:45px;background:var(--s3);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px">\u{1F4F9}</div>`}
-              <div style="flex:1;min-width:0">
-                <div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${safeTitle}">${safeTitle}</div>
-                <div style="display:flex;gap:8px;align-items:center">
-                  ${safeChannel?`<span style="font-size:10px;font-family:var(--ui);font-weight:600;color:var(--pink2)">\u{1F4CD} ${safeChannel}</span>`:''}
-                  ${views?`<span style="font-size:10px;color:var(--muted)">${views} views</span>`:''}
-                </div>
-              </div>
-              <button onclick="prefillBendUrl(this)" data-url="${safeUrl}" data-title="${safeTitle}" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:10px;padding:4px 8px;white-space:nowrap;font-family:var(--ui)">Use for bend →</button>
-            </div>`;
-          }).join('')}
-        </div>`;
+      window._lastScanOutliers = rawOutliers;
+      outlierResultsEl.innerHTML = '';
+
+      const header = document.createElement('div');
+      header.style.cssText = 'font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px';
+      header.innerHTML = 'Outlier Videos Found <span style="font-weight:400;color:var(--muted2)">(' + rawOutliers.length + ' videos — click "Use for bend" to send to Phase 2)</span>';
+      outlierResultsEl.appendChild(header);
+
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-bottom:12px';
+      outlierResultsEl.appendChild(wrap);
+
+      rawOutliers.forEach((v, vi) => {
+        const ytId = v.videoId;
+        const thumbUrl = v.thumbnail || (ytId ? 'https://img.youtube.com/vi/' + ytId + '/mqdefault.jpg' : '');
+        const videoUrl = ytId ? 'https://youtube.com/watch?v=' + ytId : '#';
+        let views = '';
+        if (typeof v.views === 'number' && v.views > 0) {
+          views = v.views >= 1000000 ? (v.views/1000000).toFixed(1) + 'M' : v.views >= 1000 ? Math.round(v.views/1000) + 'K' : String(v.views);
+        } else if (typeof v.views === 'string' && v.views) {
+          views = v.views;
+        }
+
+        const card = document.createElement('div');
+        card.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--s2);border:1px solid var(--border);border-radius:8px';
+
+        // Thumbnail link
+        const thumbLink = document.createElement('a');
+        thumbLink.href = videoUrl; thumbLink.target = '_blank';
+        thumbLink.style.cssText = 'flex-shrink:0;display:block;width:88px;height:50px;background:var(--s3);border-radius:4px;overflow:hidden';
+        if (thumbUrl) {
+          const img = document.createElement('img');
+          img.src = thumbUrl;
+          img.style.cssText = 'width:88px;height:50px;object-fit:cover;display:block';
+          img.onerror = () => { img.style.display='none'; };
+          thumbLink.appendChild(img);
+        }
+
+        // Info
+        const info = document.createElement('div');
+        info.style.cssText = 'flex:1;min-width:0';
+
+        const titleEl = document.createElement('div');
+        titleEl.style.cssText = 'font-size:11px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        titleEl.textContent = v.title;
+        titleEl.title = v.title;
+
+        const meta = document.createElement('div');
+        meta.style.cssText = 'display:flex;gap:8px;align-items:center';
+        if (v.channel) {
+          const chEl = document.createElement('span');
+          chEl.style.cssText = 'font-size:10px;font-family:var(--ui);font-weight:600;color:var(--pink2)';
+          chEl.textContent = '📍 ' + v.channel;
+          meta.appendChild(chEl);
+        }
+        if (views) {
+          const vwEl = document.createElement('span');
+          vwEl.style.cssText = 'font-size:10px;color:var(--muted)';
+          vwEl.textContent = views + ' views';
+          meta.appendChild(vwEl);
+        }
+        info.appendChild(titleEl);
+        info.appendChild(meta);
+
+        // Button
+        const btn2 = document.createElement('button');
+        btn2.style.cssText = 'background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:10px;padding:4px 8px;white-space:nowrap;font-family:var(--ui)';
+        btn2.textContent = 'Use for bend >';
+        btn2.onclick = () => prefillBendFromOutlier(vi);
+
+        card.appendChild(thumbLink);
+        card.appendChild(info);
+        card.appendChild(btn2);
+        wrap.appendChild(card);
+      });
     } else {
-      outlierResultsEl.innerHTML = '<div style="font-size:11px;color:var(--muted2);padding:6px 0">No structured video data returned. Proceeding with format extraction from channel context.</div>';
+      outlierResultsEl.innerHTML = '<div style="font-size:11px;color:var(--muted2);padding:6px 0">No video data returned from vidIQ. Format extraction will proceed from channel context.</div>';
     }
 
-    const titleList = rawOutliers.map(v=>`- "${v.title}"${v.channel?' ('+v.channel+')':''}`).join('\n');
-    const prompt = `You are a YouTube niche analyst using the Niche Bending method.\n\nI monitor these indirect competitor channels: ${ideationData.watchlist.map(ch=>`${ch.name} (${ch.category})`).join(', ')}.\n\n${rawOutliers.length?`Outlier videos found:\n${titleList}`:`Channel categories: ${ideationData.watchlist.map(ch=>ch.category).join(', ')}`}\n\nIdentify 5-8 distinct storytelling FORMAT PATTERNS visible in these videos. For each format:\n1. Give it a short name (3-5 words)\n2. Describe the structural pattern (1-2 sentences)\n3. Give one example title using that format\n4. List which content markets have already used this format (from: Gaming, Lifestyle/Vlogs, Education/Science, DIY, Health/Fitness, Beauty/Fashion, True Crime, Finance, Tech, Real Estate, Self-help, History, Parenting, Music, Sports)\n\nRespond ONLY with valid JSON array, no markdown:\n[{"name":"Format Name","description":"How it works structurally","example":"Example title","marketUsage":["Market1","Market2"]}]`;
+    // Ask Claude to extract format patterns
+    const titleList = rawOutliers.map(v => '- "' + v.title + '"' + (v.channel ? ' (' + v.channel + ')' : '')).join('\n');
+    const prompt = 'You are a YouTube niche analyst using the Niche Bending method.\n\nI monitor these indirect competitor channels: ' + ideationData.watchlist.map(ch => ch.name + ' (' + ch.category + ')').join(', ') + '.\n\n' + (rawOutliers.length ? 'Outlier videos found:\n' + titleList : 'Channel categories: ' + ideationData.watchlist.map(ch => ch.category).join(', ')) + '\n\nIdentify 5-8 distinct storytelling FORMAT PATTERNS visible in these videos. For each format:\n1. Give it a short name (3-5 words)\n2. Describe the structural pattern (1-2 sentences)\n3. Give one example title using that format\n4. List which content markets have already used this format (from: Gaming, Lifestyle/Vlogs, Education/Science, DIY, Health/Fitness, Beauty/Fashion, True Crime, Finance, Tech, Real Estate, Self-help, History, Parenting, Music, Sports)\n\nRespond ONLY with valid JSON array, no markdown:\n[{"name":"Format Name","description":"How it works structurally","example":"Example title","marketUsage":["Market1","Market2"]}]';
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':claudeKey,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,messages:[{role:'user',content:prompt}]})
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true', 'x-api-key': claudeKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await resp.json();
-    const text = data.content?.[0]?.text||'[]';
-    const clean = text.replace(/```json|```/g,'').trim();
+    const text = data.content?.[0]?.text || '[]';
+    const clean = text.replace(/```json|```/g, '').trim();
     const formats = JSON.parse(clean);
-    const existing = new Set(ideationData.formatLibrary.map(f=>f.name.toLowerCase()));
-    let added=0;
+    const existing = new Set(ideationData.formatLibrary.map(f => f.name.toLowerCase()));
+    let added = 0;
     for (const f of formats) {
       if (!existing.has(f.name.toLowerCase())) {
-        ideationData.formatLibrary.push({id:Date.now()+Math.random(),name:f.name,description:f.description,example:f.example,marketUsage:f.marketUsage||[]});
+        ideationData.formatLibrary.push({ id: Date.now() + Math.random(), name: f.name, description: f.description, example: f.example, marketUsage: f.marketUsage || [] });
         added++;
       }
     }
     saveIdeation();
     renderFormatLibrary();
-    showAlert('scan-alert',`Scan complete. ${added} new format${added!==1?'s':''} added to the library.`,'success');
+    showAlert('scan-alert', 'Scan complete. ' + added + ' new format' + (added !== 1 ? 's' : '') + ' added to the library.', 'success');
   } catch(e) {
-    showAlert('scan-alert','Scan error: '+e.message,'error');
+    showAlert('scan-alert', 'Scan error: ' + e.message, 'error');
   } finally {
-    btn.disabled=false; btn.textContent='\u26a1 Scan for outlier videos';
+    btn.disabled = false; btn.textContent = 'Scan for outlier videos';
   }
 }
 
-function prefillBendUrl(el) {
-  const url = el.dataset.url || '';
-  const title = el.dataset.title || '';
-  document.getElementById('bend-video-url').value = url;
-  document.getElementById('bend-video-url').scrollIntoView({behavior:'smooth',block:'center'});
-  document.getElementById('bend-video-url').style.borderColor='var(--pink2)';
-  setTimeout(()=>document.getElementById('bend-video-url').style.borderColor='',1500);
+function prefillBendFromOutlier(vi) {
+  const outliers = window._lastScanOutliers || [];
+  const v = outliers[vi];
+  if (!v) return;
+  const ytId = v.videoId;
+  const url = ytId ? 'https://youtube.com/watch?v=' + ytId : '';
+  if (url) {
+    document.getElementById('bend-video-url').value = url;
+    document.getElementById('bend-video-url').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('bend-video-url').style.borderColor = 'var(--pink2)';
+    setTimeout(() => document.getElementById('bend-video-url').style.borderColor = '', 1500);
+  }
 }
 
 // ── MY CHANNELS ──
@@ -3570,7 +3614,7 @@ function saveMyChannel() {
   const desc=document.getElementById('mc-desc').value.trim();
   if (!name) { alert('Channel name required.'); return; }
   ideationData.myChannels.push({id:Date.now(),name,market,desc});
-  saveIdeation(); closeMyChannelModal(); renderMyChannels();
+  saveIdeation(); closeMyChannelModal(); renderMyChannels(); renderMarketGrid(); renderMarketMap();
 }
 function removeMyChannel(i) { ideationData.myChannels.splice(i,1); saveIdeation(); renderMyChannels(); }
 
