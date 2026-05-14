@@ -3420,7 +3420,7 @@ function removeFormat(i) { ideationData.formatLibrary.splice(i,1); saveIdeation(
 
 // ── SCAN OUTLIERS ──
 async function scanWatchlistOutliers() {
-  const claudeKey = localStorage.getItem('pt-claude-key');
+  const claudeKey = document.getElementById('claude-key').value.trim();
   if (!claudeKey) { showAlert('scan-alert','Add your Claude API key in Settings first.','warn'); return; }
   if (!ideationData.watchlist.length) { showAlert('scan-alert','Add at least one channel to your watchlist first.','warn'); return; }
   const btn = document.getElementById('scan-outliers-btn');
@@ -3429,11 +3429,12 @@ async function scanWatchlistOutliers() {
   try {
     // Pull outliers from vidIQ for each watchlist channel keyword
     const keywords = ideationData.watchlist.map(ch=>ch.name).join(', ');
-    const vidiqKey = localStorage.getItem('pt-vidiq-key')||'';
     let outlierTitles = [];
     try {
-      const vidiqRes = await callClaudeVidIQ(`Find the top 10 most viral outlier videos from these YouTube channels: ${keywords}. Return only video titles and view counts.`, vidiqKey);
-      outlierTitles = vidiqRes||[];
+      const vidiqRes = await callClaudeVidIQ(claudeKey, `Find the top 10 most viral outlier videos from these YouTube channels: ${keywords}. Return only video titles and view counts.`);
+      // Extract text from response
+      const textBlocks = (vidiqRes?.textBlocks||[]).join(' ');
+      if (textBlocks) outlierTitles = textBlocks.split('\n').filter(l=>l.trim().startsWith('-')||/^\d+\./.test(l.trim())).map(l=>l.replace(/^[-\d.]\s*/,'').trim()).filter(Boolean);
     } catch(e) { outlierTitles = []; }
 
     // Ask Claude to extract format patterns
@@ -3624,8 +3625,7 @@ function populateBendChannelSelect() {
 
 async function fetchBendTranscript() {
   const url = document.getElementById('bend-video-url').value.trim();
-  const claudeKey = localStorage.getItem('pt-claude-key');
-  const vidiqKey = localStorage.getItem('pt-vidiq-key')||'';
+  const claudeKey = document.getElementById('claude-key').value.trim();
   if (!url) { showAlert('bend-alert','Paste a YouTube video URL.','warn'); return; }
   if (!claudeKey) { showAlert('bend-alert','Add your Claude API key in Settings.','warn'); return; }
   const btn = document.getElementById('bend-fetch-btn');
@@ -3641,10 +3641,9 @@ async function fetchBendTranscript() {
     let videoTitle = '';
     // Try vidIQ transcript
     try {
-      const transcriptRes = await callClaudeVidIQ(`Get the full transcript for YouTube video ID: ${vidId}. URL: ${url}`, vidiqKey);
-      if (transcriptRes && typeof transcriptRes === 'string' && transcriptRes.length > 100) {
-        transcript = transcriptRes.substring(0,4000);
-      }
+      const transcriptRes = await callClaudeVidIQ(claudeKey, `Use vidiq_video_transcript to get the transcript for this YouTube video: ${url} (video ID: ${vidId}). Return the full transcript text.`);
+      const text = (transcriptRes?.textBlocks||[]).join(' ');
+      if (text && text.length > 100) transcript = text.substring(0,4000);
     } catch(e) {}
     // Try fetching title from oEmbed
     try {
@@ -3674,7 +3673,7 @@ async function fetchBendTranscript() {
 
 async function extractSkeletonAndBend() {
   const channelId = document.getElementById('bend-channel-select').value;
-  const claudeKey = localStorage.getItem('pt-claude-key');
+  const claudeKey = document.getElementById('claude-key').value.trim();
   if (!channelId) { showAlert('bend-alert','Select your channel first.','warn'); return; }
   if (!window._bendTranscript) { showAlert('bend-alert','Fetch a video first.','warn'); return; }
   const ch = ideationData.myChannels.find(c=>c.id==channelId);
