@@ -1931,12 +1931,42 @@ select option{background:var(--s1)}
       <div class="page-title"><span class="page-title-icon">💡</span> Video Ideas</div>
       <div class="page-desc">Set up your channel profiles, then generate tailored ideas — one click per channel.</div>
     </div>
-    <div class="ai-panel-card">
-      <div class="ai-panel-card-title">🤖 AI used in this tab</div>
-      <div class="ai-panel-rows">
-        <div class="ai-panel-row"><span class="ai-panel-task">Fetch trending &amp; outlier data</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku + vidIQ</span><span class="ai-panel-cost">~$0.001</span></div>
-        <div class="ai-panel-row"><span class="ai-panel-task">Generate 10 idea cards</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku</span><span class="ai-panel-cost">~$0.002</span></div>
-        <div class="ai-panel-row"><span class="ai-panel-task">Score ideas with keyword data</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku + vidIQ</span><span class="ai-panel-cost">~$0.001</span></div>
+    <!-- How ideas are generated — collapsible (includes AI card) -->
+    <div style="margin-bottom:20px">
+      <button onclick="toggleIdeasDrawer()" style="display:flex;align-items:center;gap:8px;background:none;border:1px solid var(--border);border-radius:8px;padding:9px 14px;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:600;color:var(--muted);width:100%;text-align:left" id="ideas-drawer-btn">
+        <span id="ideas-drawer-arrow" style="font-size:10px;transition:transform 0.2s">▶</span>
+        ⚙️ How ideas are generated — click to view &amp; edit the AI prompt
+      </button>
+      <div id="ideas-drawer" style="display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:16px;background:var(--s2)">
+
+        <!-- AI used mini-table -->
+        <div class="ai-panel-card" style="margin-bottom:14px">
+          <div class="ai-panel-card-title">🤖 AI used in this tab</div>
+          <div class="ai-panel-rows">
+            <div class="ai-panel-row"><span class="ai-panel-task">Fetch trending &amp; outlier data</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku + vidIQ</span><span class="ai-panel-cost">~$0.001</span></div>
+            <div class="ai-panel-row"><span class="ai-panel-task">Generate 10 idea cards</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku</span><span class="ai-panel-cost">~$0.002</span></div>
+            <div class="ai-panel-row"><span class="ai-panel-task">Score ideas with keyword data</span><span class="ai-badge ai-badge-haiku" style="font-size:9px">Claude Haiku + vidIQ</span><span class="ai-panel-cost">~$0.001</span></div>
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px">
+          <strong style="color:var(--text)">Step 1 — vidIQ fetch:</strong> Keywords are extracted from your channel niche and sent to vidIQ to pull <strong>8 trending</strong> + <strong>8 breakout/outlier</strong> video titles.<br>
+          <strong style="color:var(--text)">Step 2 — Idea generation:</strong> Claude Haiku receives your channel profile + those titles as inspiration signals, then generates 10 original idea cards (title, hook, format, score, angle).<br>
+          <strong style="color:var(--text)">Step 3 — vidIQ scoring:</strong> Each idea's keyword is researched via vidIQ to overlay real search volume + competition data.
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.05em;text-transform:uppercase;display:block;margin-bottom:6px">System prompt sent to Claude (editable)</label>
+          <textarea id="ideas-system-prompt-override" rows="14" style="width:100%;font-family:var(--mono);font-size:11px;line-height:1.6;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--s1);color:var(--text);resize:vertical;box-sizing:border-box" placeholder="Leave blank to use the default prompt…"></textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="resetIdeasPrompt()">↺ Reset to default</button>
+          <button class="btn btn-sm" style="background:var(--pink);color:#fff" onclick="saveIdeasPrompt()">Save prompt</button>
+          <span id="ideas-prompt-saved" style="font-size:11px;color:var(--green);display:none">✓ Saved</span>
+        </div>
+        <div style="margin-top:12px;padding:10px;background:rgba(26,111,181,0.05);border:1px solid rgba(26,111,181,0.15);border-radius:6px;font-size:11px;color:var(--muted);line-height:1.6">
+          <strong style="color:var(--text)">Available variables:</strong><br>
+          <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{channelName}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{niche}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{styleDesc}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{refChannels}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{formatInstruction}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{trendingTitles}</code> · <code style="background:var(--s1);padding:1px 4px;border-radius:3px">{outlierTitles}</code>
+        </div>
       </div>
     </div>
 
@@ -3901,26 +3931,14 @@ async function scoreIdeasWithVidIQ(ideas, claudeKey) {
   }
 }
 
-async function generateIdeaCardsForProfile(trending, outliers, profile, formatFilter, claudeKey) {
-  const trendingTitles = trending.slice(0,8).map(v=>v.title||v.videoTitle||'').filter(Boolean);
-  const outlierTitles  = outliers.slice(0,8).map(v=>v.title||v.videoTitle||'').filter(Boolean);
-
-  const formatInstruction = formatFilter==='listicle'
-    ? 'All ideas must be listicle format (e.g. "7 habits destroying your focus").'
-    : formatFilter==='multi'
-    ? 'All ideas must be multi-topic compilation format.'
-    : 'Mix of listicle and multi-topic compilation formats.';
-
-  const refLine = profile.refs?.length ? `Reference/competitor channels: ${profile.refs.join(', ')}` : '';
-
-  const systemPrompt = `You are a YouTube content strategist. Generate video idea cards for this specific channel.
+const DEFAULT_IDEAS_SYSTEM_PROMPT = `You are a YouTube content strategist. Generate video idea cards for this specific channel.
 
 CHANNEL PROFILE:
-- Name: ${profile.name}
-- Niche: ${profile.niche}
-${profile.desc ? '- Style & audience: '+profile.desc : ''}
-${refLine}
-- Format: ${formatInstruction}
+- Name: {channelName}
+- Niche: {niche}
+- Style & audience: {styleDesc}
+- Reference/competitor channels: {refChannels}
+- Format: {formatInstruction}
 
 Use the trending and breakout video titles below as signals. Generate ORIGINAL ideas — not copies.
 
@@ -3934,6 +3952,66 @@ Return ONLY a valid JSON array of exactly 10 objects:
   "angle": "what makes this fresh",
   "dataSource": "trending" or "outlier" or "original"
 }`;
+
+function toggleIdeasDrawer() {
+  const drawer = document.getElementById('ideas-drawer');
+  const arrow  = document.getElementById('ideas-drawer-arrow');
+  const open   = drawer.style.display === 'block';
+  drawer.style.display = open ? 'none' : 'block';
+  arrow.style.transform = open ? '' : 'rotate(90deg)';
+  if (!open) loadIdeasPromptIntoDrawer();
+}
+
+function loadIdeasPromptIntoDrawer() {
+  const saved = localStorage.getItem('pt-ideas-system-prompt') || '';
+  const ta = document.getElementById('ideas-system-prompt-override');
+  if (ta) ta.value = saved || DEFAULT_IDEAS_SYSTEM_PROMPT;
+}
+
+function saveIdeasPrompt() {
+  const val = document.getElementById('ideas-system-prompt-override').value.trim();
+  if (val && val !== DEFAULT_IDEAS_SYSTEM_PROMPT) {
+    localStorage.setItem('pt-ideas-system-prompt', val);
+  } else {
+    localStorage.removeItem('pt-ideas-system-prompt');
+  }
+  const saved = document.getElementById('ideas-prompt-saved');
+  saved.style.display = 'inline';
+  setTimeout(() => saved.style.display = 'none', 2000);
+}
+
+function resetIdeasPrompt() {
+  localStorage.removeItem('pt-ideas-system-prompt');
+  document.getElementById('ideas-system-prompt-override').value = DEFAULT_IDEAS_SYSTEM_PROMPT;
+  const saved = document.getElementById('ideas-prompt-saved');
+  saved.style.display = 'inline';
+  setTimeout(() => saved.style.display = 'none', 2000);
+}
+
+function getIdeasSystemPrompt(profile, formatInstruction, trendingTitles, outlierTitles) {
+  const saved = localStorage.getItem('pt-ideas-system-prompt');
+  const template = saved || DEFAULT_IDEAS_SYSTEM_PROMPT;
+  return template
+    .replace(/{channelName}/g, profile.name || '')
+    .replace(/{niche}/g, profile.niche || '')
+    .replace(/{styleDesc}/g, profile.desc || '')
+    .replace(/{refChannels}/g, profile.refs?.join(', ') || '')
+    .replace(/{formatInstruction}/g, formatInstruction)
+    .replace(/{trendingTitles}/g, trendingTitles.map((t,i)=>`${i+1}. ${t}`).join('\n') || '(none)')
+    .replace(/{outlierTitles}/g, outlierTitles.map((t,i)=>`${i+1}. ${t}`).join('\n') || '(none)');
+}
+
+async function generateIdeaCardsForProfile(trending, outliers, profile, formatFilter, claudeKey) {
+  const trendingTitles = trending.slice(0,8).map(v=>v.title||v.videoTitle||'').filter(Boolean);
+  const outlierTitles  = outliers.slice(0,8).map(v=>v.title||v.videoTitle||'').filter(Boolean);
+
+  const formatInstruction = formatFilter==='listicle'
+    ? 'All ideas must be listicle format (e.g. "7 habits destroying your focus").'
+    : formatFilter==='multi'
+    ? 'All ideas must be multi-topic compilation format.'
+    : 'Mix of listicle and multi-topic compilation formats.';
+
+  const systemPrompt = getIdeasSystemPrompt(profile, formatInstruction, trendingTitles, outlierTitles);
 
   const userPrompt = `Trending now:\n${trendingTitles.map((t,i)=>`${i+1}. ${t}`).join('\n')||'(none)'}\n\nBreakout videos:\n${outlierTitles.map((t,i)=>`${i+1}. ${t}`).join('\n')||'(none)'}\n\nGenerate 10 ideas.`;
 
