@@ -1419,11 +1419,11 @@ select option{background:var(--s1)}
       <div style="font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:10px">Core Formula</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px">
-          <div style="font-size:10px;color:rgba(255,255,255,0.45);font-family:var(--ui);font-weight:600;margin-bottom:4px">VIRAL CHANNEL</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.45);font-family:var(--ui);font-weight:600;margin-bottom:4px">NICHE BENDING (VIRAL CHANNEL)</div>
           <div style="font-size:13px;font-weight:700;color:#fff;font-family:var(--ui)">Proven Format <span style="color:var(--pink2)">×</span> Untapped Market</div>
         </div>
         <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px">
-          <div style="font-size:10px;color:rgba(255,255,255,0.45);font-family:var(--ui);font-weight:600;margin-bottom:4px">VIRAL VIDEO</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.45);font-family:var(--ui);font-weight:600;margin-bottom:4px">SCRIPT BENDING (VIRAL VIDEO)</div>
           <div style="font-size:13px;font-weight:700;color:#fff;font-family:var(--ui)">Unique Idea <span style="color:var(--pink2)">+</span> Proven Storytelling Framework</div>
         </div>
       </div>
@@ -1432,7 +1432,7 @@ select option{background:var(--s1)}
 
     <!-- PHASE 1 -->
     <div style="font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--pink2);margin-bottom:12px;display:flex;align-items:center;gap:8px">
-      <span style="background:var(--pink2);color:#fff;border-radius:4px;padding:2px 7px;font-size:9px">PHASE 1</span> Niche Bending — Find Your Channel
+      <span style="background:var(--pink2);color:#fff;border-radius:4px;padding:2px 7px;font-size:9px">PHASE 1</span> Niche Bending — Define Channel
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
@@ -1513,7 +1513,7 @@ select option{background:var(--s1)}
 
     <!-- PHASE 2 -->
     <div style="font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--pink2);margin-bottom:12px;display:flex;align-items:center;gap:8px">
-      <span style="background:var(--pink2);color:#fff;border-radius:4px;padding:2px 7px;font-size:9px">PHASE 2</span> Script Bending — Create Individual Videos
+      <span style="background:var(--pink2);color:#fff;border-radius:4px;padding:2px 7px;font-size:9px">PHASE 2</span> Script Bending — Create Topics
     </div>
 
     <div class="card" style="margin-bottom:16px">
@@ -3424,34 +3424,77 @@ async function scanWatchlistOutliers() {
   if (!claudeKey) { showAlert('scan-alert','Add your Claude API key in Settings first.','warn'); return; }
   if (!ideationData.watchlist.length) { showAlert('scan-alert','Add at least one channel to your watchlist first.','warn'); return; }
   const btn = document.getElementById('scan-outliers-btn');
-  btn.disabled=true; btn.textContent='⏳ Scanning…';
+  btn.disabled=true; btn.textContent='\u23f3 Scanning\u2026';
   hideAlert('scan-alert');
+  let outlierResultsEl = document.getElementById('scan-outlier-results');
+  if (!outlierResultsEl) {
+    outlierResultsEl = document.createElement('div');
+    outlierResultsEl.id = 'scan-outlier-results';
+    outlierResultsEl.style.cssText = 'margin-top:12px';
+    const alertEl = document.getElementById('scan-alert');
+    alertEl.parentNode.insertBefore(outlierResultsEl, alertEl);
+  }
+  outlierResultsEl.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">Fetching outlier videos from vidIQ\u2026</div>';
   try {
-    // Pull outliers from vidIQ for each watchlist channel keyword
-    const keywords = ideationData.watchlist.map(ch=>ch.name).join(', ');
-    let outlierTitles = [];
+    let rawOutliers = [];
     try {
-      const vidiqRes = await callClaudeVidIQ(claudeKey, `Find the top 10 most viral outlier videos from these YouTube channels: ${keywords}. Return only video titles and view counts.`);
-      // Extract text from response
-      const textBlocks = (vidiqRes?.textBlocks||[]).join(' ');
-      if (textBlocks) outlierTitles = textBlocks.split('\n').filter(l=>l.trim().startsWith('-')||/^\d+\./.test(l.trim())).map(l=>l.replace(/^[-\d.]\s*/,'').trim()).filter(Boolean);
-    } catch(e) { outlierTitles = []; }
+      const vidiqRes = await callClaudeVidIQ(claudeKey, `Use vidiq_outliers to find top breakout videos. keyword="${ideationData.watchlist.map(ch=>ch.category).join(' ')}", contentType="long", limit=15. Also search for channels: ${ideationData.watchlist.map(ch=>ch.name).join(', ')}. For each video return: title, channel name, view count, video ID, thumbnail URL.`);
+      const toolResults = vidiqRes?.toolResults||[];
+      for (const tr of toolResults) {
+        try {
+          const parsed = JSON.parse(tr);
+          const videos = parsed.videos||parsed.results||parsed.data||parsed.outliers||[];
+          if (Array.isArray(videos)&&videos.length) {
+            rawOutliers = videos.map(v=>({
+              title:v.title||v.name||'',
+              channel:v.channel_title||v.channel||v.channelTitle||'',
+              views:v.views||v.view_count||v.viewCount||0,
+              videoId:v.video_id||v.videoId||v.id||'',
+              thumbnail:v.thumbnail||v.thumbnail_url||v.thumbnailUrl||''
+            })).filter(v=>v.title);
+            break;
+          }
+        } catch(e) {}
+      }
+      if (!rawOutliers.length) {
+        const text = (vidiqRes?.textBlocks||[]).join('\n');
+        if (text) rawOutliers = text.split('\n').filter(l=>l.trim().length>10).slice(0,12).map(l=>({title:l.replace(/^[-\d.*\u2022]\s*/,'').trim(),channel:'',views:0,videoId:'',thumbnail:''}));
+      }
+    } catch(e) { rawOutliers=[]; }
 
-    // Ask Claude to extract format patterns
-    const prompt = `You are a YouTube niche analyst using the Niche Bending method.
+    if (rawOutliers.length) {
+      outlierResultsEl.innerHTML = `
+        <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px">
+          Outlier Videos Found <span style="font-weight:400;color:var(--muted2)">(${rawOutliers.length} videos)</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+          ${rawOutliers.map(v=>{
+            const ytId = v.videoId;
+            const thumbUrl = v.thumbnail||(ytId?`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`:'');
+            const videoUrl = ytId?`https://youtube.com/watch?v=${ytId}`:'#';
+            const views = v.views?(v.views>=1000000?(v.views/1000000).toFixed(1)+'M':v.views>=1000?(v.views/1000).toFixed(0)+'K':v.views):'';
+            const safeTitle = escHtml(v.title);
+            const safeChannel = escHtml(v.channel||'');
+            const safeUrl = escHtml(videoUrl);
+            return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
+              ${thumbUrl?`<a href="${videoUrl}" target="_blank" style="flex-shrink:0"><img src="${thumbUrl}" style="width:80px;height:45px;object-fit:cover;border-radius:4px;display:block" onerror="this.parentElement.innerHTML='<div style=\'width:80px;height:45px;background:var(--s3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px\'>\u{1F4F9}</div>'" /></a>`:`<div style="width:80px;height:45px;background:var(--s3);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px">\u{1F4F9}</div>`}
+              <div style="flex:1;min-width:0">
+                <div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${safeTitle}">${safeTitle}</div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  ${safeChannel?`<span style="font-size:10px;font-family:var(--ui);font-weight:600;color:var(--pink2)">\u{1F4CD} ${safeChannel}</span>`:''}
+                  ${views?`<span style="font-size:10px;color:var(--muted)">${views} views</span>`:''}
+                </div>
+              </div>
+              <button onclick="prefillBendUrl(this)" data-url="${safeUrl}" data-title="${safeTitle}" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:10px;padding:4px 8px;white-space:nowrap;font-family:var(--ui)">Use for bend 2192</button>
+            </div>`;
+          }).join('')}
+        </div>`;
+    } else {
+      outlierResultsEl.innerHTML = '<div style="font-size:11px;color:var(--muted2);padding:6px 0">No structured video data returned. Proceeding with format extraction from channel context.</div>';
+    }
 
-I run a faceless YouTube channel and I monitor these indirect competitor channels: ${ideationData.watchlist.map(ch=>`${ch.name} (${ch.category})`).join(', ')}.
-
-${outlierTitles.length ? `Recent viral video titles from these channels:\n${outlierTitles.slice(0,15).map(t=>`- ${t}`).join('\n')}` : `Channel categories: ${ideationData.watchlist.map(ch=>ch.category).join(', ')}`}
-
-Identify 5-8 distinct storytelling FORMAT PATTERNS that are currently working. For each format:
-1. Give it a short name (3-5 words)
-2. Describe the structural pattern (1-2 sentences)
-3. Give one example title using that format
-4. List which content markets have already used this format (from: Gaming, Lifestyle/Vlogs, Education/Science, DIY, Health/Fitness, Beauty/Fashion, True Crime, Finance, Tech, Real Estate, Self-help, History, Parenting, Music, Sports)
-
-Respond ONLY with valid JSON array, no markdown:
-[{"name":"Format Name","description":"How it works structurally","example":"Example title","marketUsage":["Market1","Market2"]}]`;
+    const titleList = rawOutliers.map(v=>`- "${v.title}"${v.channel?' ('+v.channel+')':''}`).join('\n');
+    const prompt = `You are a YouTube niche analyst using the Niche Bending method.\n\nI monitor these indirect competitor channels: ${ideationData.watchlist.map(ch=>`${ch.name} (${ch.category})`).join(', ')}.\n\n${rawOutliers.length?`Outlier videos found:\n${titleList}`:`Channel categories: ${ideationData.watchlist.map(ch=>ch.category).join(', ')}`}\n\nIdentify 5-8 distinct storytelling FORMAT PATTERNS visible in these videos. For each format:\n1. Give it a short name (3-5 words)\n2. Describe the structural pattern (1-2 sentences)\n3. Give one example title using that format\n4. List which content markets have already used this format (from: Gaming, Lifestyle/Vlogs, Education/Science, DIY, Health/Fitness, Beauty/Fashion, True Crime, Finance, Tech, Real Estate, Self-help, History, Parenting, Music, Sports)\n\nRespond ONLY with valid JSON array, no markdown:\n[{"name":"Format Name","description":"How it works structurally","example":"Example title","marketUsage":["Market1","Market2"]}]`;
 
     const resp = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
@@ -3462,7 +3505,6 @@ Respond ONLY with valid JSON array, no markdown:
     const text = data.content?.[0]?.text||'[]';
     const clean = text.replace(/```json|```/g,'').trim();
     const formats = JSON.parse(clean);
-    // Merge — avoid duplicates by name
     const existing = new Set(ideationData.formatLibrary.map(f=>f.name.toLowerCase()));
     let added=0;
     for (const f of formats) {
@@ -3477,8 +3519,17 @@ Respond ONLY with valid JSON array, no markdown:
   } catch(e) {
     showAlert('scan-alert','Scan error: '+e.message,'error');
   } finally {
-    btn.disabled=false; btn.textContent='⚡ Scan for outlier videos';
+    btn.disabled=false; btn.textContent='\u26a1 Scan for outlier videos';
   }
+}
+
+function prefillBendUrl(el) {
+  const url = el.dataset.url || '';
+  const title = el.dataset.title || '';
+  document.getElementById('bend-video-url').value = url;
+  document.getElementById('bend-video-url').scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('bend-video-url').style.borderColor='var(--pink2)';
+  setTimeout(()=>document.getElementById('bend-video-url').style.borderColor='',1500);
 }
 
 // ── MY CHANNELS ──
