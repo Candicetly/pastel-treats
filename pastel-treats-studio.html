@@ -1449,11 +1449,16 @@ select option{background:var(--s1)}
         <!-- Watchlist -->
         <div style="margin-bottom:14px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text)">Breakout Channel Watchlist</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <button onclick="toggleSection('watchlist-body','watchlist-toggle')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px;padding:0;line-height:1" id="watchlist-toggle">&#9660;</button>
+              <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text)">Breakout Channel Watchlist <span id="watchlist-count" style="font-weight:400;color:var(--muted2)"></span></div>
+            </div>
             <button class="btn btn-pink btn-sm" onclick="openAddWatchlistModal()">+ Add channel</button>
           </div>
-          <div id="watchlist-empty" style="font-size:12px;color:var(--muted2);padding:10px 0;display:block">No channels yet. Add indirect competitors — history, military, true crime, finance, self-help.</div>
-          <div id="watchlist-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div id="watchlist-body">
+            <div id="watchlist-empty" style="font-size:12px;color:var(--muted2);padding:10px 0;display:block">No channels yet. Add indirect competitors — history, military, true crime, finance, self-help.</div>
+            <div id="watchlist-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          </div>
         </div>
 
         <!-- Scan button -->
@@ -1461,9 +1466,14 @@ select option{background:var(--s1)}
 
         <!-- Format Library -->
         <div>
-          <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px">Format Library <span style="font-weight:400;color:var(--muted2);font-size:10px">— auto-built from scans</span></div>
-          <div id="format-library-empty" style="font-size:12px;color:var(--muted2);padding:6px 0">No formats yet. Scan channels above to populate.</div>
-          <div id="format-library-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+            <button onclick="toggleSection('format-library-body','format-library-toggle')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px;padding:0;line-height:1" id="format-library-toggle">&#9660;</button>
+            <div style="font-family:var(--ui);font-size:11px;font-weight:700;color:var(--text)">Format Library <span style="font-weight:400;color:var(--muted2);font-size:10px">— auto-built from scans</span> <span id="format-library-count" style="font-weight:400;color:var(--muted2);font-size:10px"></span></div>
+          </div>
+          <div id="format-library-body">
+            <div id="format-library-empty" style="font-size:12px;color:var(--muted2);padding:6px 0">No formats yet. Scan channels above to populate.</div>
+            <div id="format-library-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          </div>
         </div>
         <div id="scan-alert" class="alert" style="display:none;margin-top:10px"></div>
       </div>
@@ -3381,52 +3391,94 @@ function initIdeation() {
 }
 
 // ── WATCHLIST ──
+function toggleSection(bodyId, toggleId) {
+  const body = document.getElementById(bodyId);
+  const toggle = document.getElementById(toggleId);
+  if (!body) return;
+  const collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? '' : 'none';
+  if (toggle) toggle.textContent = collapsed ? '\u25bc' : '\u25b6';
+}
+
 function renderWatchlist() {
   const list = document.getElementById('watchlist-list');
   const empty = document.getElementById('watchlist-empty');
+  const countEl = document.getElementById('watchlist-count');
+  if (countEl) countEl.textContent = ideationData.watchlist.length ? '(' + ideationData.watchlist.length + ')' : '';
   if (!ideationData.watchlist.length) { empty.style.display='block'; list.innerHTML=''; return; }
   empty.style.display='none';
   list.innerHTML = ideationData.watchlist.map((ch,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
       <div style="flex:1;min-width:0">
         <div style="font-family:var(--ui);font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(ch.name)}</div>
-        <div style="font-size:10px;color:var(--muted)">${escHtml(ch.category)} · <a href="${escHtml(ch.url)}" target="_blank" style="color:var(--pink2);text-decoration:none">${escHtml(ch.url.replace('https://','').substring(0,35))}…</a></div>
+        <div style="font-size:10px;color:var(--muted)">${escHtml(ch.category)} &middot; <a href="${escHtml(ch.url)}" target="_blank" style="color:var(--pink2);text-decoration:none">${escHtml(ch.url.replace('https://','').substring(0,35))}...</a></div>
       </div>
-      <button onclick="removeWatchlistChannel(${i})" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:2px 6px" title="Remove">✕</button>
+      <button onclick="editWatchlistChannel(${i})" style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;font-size:10px;padding:2px 7px;font-family:var(--ui)">Edit</button>
+      <button onclick="removeWatchlistChannel(${i})" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:2px 6px" title="Remove">&times;</button>
     </div>`).join('');
 }
 
-function openAddWatchlistModal() { document.getElementById('wl-name').value=''; document.getElementById('wl-url').value=''; document.getElementById('watchlist-modal').style.display='flex'; }
+function openAddWatchlistModal() { document.getElementById('wl-name').value=''; document.getElementById('wl-url').value=''; window._editingWatchlistIdx=null; document.getElementById('watchlist-modal').style.display='flex'; }
 function closeWatchlistModal() { document.getElementById('watchlist-modal').style.display='none'; }
 function saveWatchlistChannel() {
   const name=document.getElementById('wl-name').value.trim();
   const url=document.getElementById('wl-url').value.trim();
   const category=document.getElementById('wl-category').value;
   if (!name||!url) { alert('Name and URL required.'); return; }
-  ideationData.watchlist.push({id:Date.now(),name,url,category});
+  const editIdx = window._editingWatchlistIdx;
+  if (editIdx !== undefined && editIdx !== null && ideationData.watchlist[editIdx]) {
+    ideationData.watchlist[editIdx] = { ...ideationData.watchlist[editIdx], name, url, category };
+    window._editingWatchlistIdx = null;
+  } else {
+    ideationData.watchlist.push({id:Date.now(),name,url,category});
+  }
   saveIdeation(); closeWatchlistModal(); renderWatchlist();
 }
 function removeWatchlistChannel(i) { ideationData.watchlist.splice(i,1); saveIdeation(); renderWatchlist(); }
+function editWatchlistChannel(i) {
+  const ch = ideationData.watchlist[i];
+  if (!ch) return;
+  document.getElementById('wl-name').value = ch.name;
+  document.getElementById('wl-url').value = ch.url;
+  document.getElementById('wl-category').value = ch.category;
+  window._editingWatchlistIdx = i;
+  document.getElementById('watchlist-modal').style.display = 'flex';
+}
 
 // ── FORMAT LIBRARY ──
 function renderFormatLibrary() {
   const list = document.getElementById('format-library-list');
   const empty = document.getElementById('format-library-empty');
+  const countEl = document.getElementById('format-library-count');
+  if (countEl) countEl.textContent = ideationData.formatLibrary.length ? '(' + ideationData.formatLibrary.length + ')' : '';
   if (!ideationData.formatLibrary.length) { empty.style.display='block'; list.innerHTML=''; return; }
   empty.style.display='none';
-  list.innerHTML = ideationData.formatLibrary.map((f,i)=>`
-    <div style="padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
+  list.innerHTML = ideationData.formatLibrary.map((f,i)=>{
+    const sourceHtml = (f.sourceVideos&&f.sourceVideos.length) ? '<div style="border-top:1px solid var(--border);padding-top:6px;margin-top:6px"><div style="font-size:9px;font-family:var(--ui);font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px">Referenced from</div>' + f.sourceVideos.map(sv => {
+      const ytId = sv.videoId||'';
+      const thumb = sv.thumbnail||(ytId?'https://img.youtube.com/vi/'+ytId+'/mqdefault.jpg':'');
+      const href = ytId?'https://youtube.com/watch?v='+ytId:(sv.url||'#');
+      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 7px;background:var(--s1);border:1px solid var(--border);border-radius:6px;margin-bottom:4px">' +
+        (thumb?'<a href="'+escHtml(href)+'" target="_blank" style="flex-shrink:0"><img src="'+escHtml(thumb)+'" style="width:60px;height:34px;object-fit:cover;border-radius:3px;display:block" onerror="this.style.display=\'none\'" /></a>':'') +
+        '<div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(sv.title||'')+'</div>' +
+        (sv.channel?'<div style="font-size:9px;color:var(--pink2);font-family:var(--ui);font-weight:600">'+escHtml(sv.channel)+'</div>':'') +
+        '</div><a href="'+escHtml(href)+'" target="_blank" style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);text-decoration:none;font-size:9px;padding:2px 7px;font-family:var(--ui);white-space:nowrap;flex-shrink:0">Open</a></div>';
+    }).join('') + '</div>' : '';
+    return `<div style="padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
         <div style="font-family:var(--ui);font-size:12px;font-weight:700;color:var(--text)">${escHtml(f.name)}</div>
-        <button onclick="removeFormat(${i})" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;margin-left:auto;padding:0 4px">✕</button>
+        <button onclick="removeFormat(${i})" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;margin-left:auto;padding:0 4px">&times;</button>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${escHtml(f.description)}</div>
-      <div style="font-size:10px;color:var(--muted2);font-style:italic">e.g. "${escHtml(f.example)}"</div>
-      ${f.marketUsage&&f.marketUsage.length?`<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${f.marketUsage.map(m=>`<span style="font-size:9px;font-family:var(--ui);font-weight:600;padding:2px 7px;border-radius:10px;background:var(--pink-dim);color:var(--pink2)">${escHtml(m)}</span>`).join('')}</div>`:''}
-    </div>`).join('');
+      <div style="font-size:10px;color:var(--muted2);font-style:italic;margin-bottom:4px">e.g. "${escHtml(f.example)}"</div>
+      ${f.marketUsage&&f.marketUsage.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${f.marketUsage.map(m=>`<span style="font-size:9px;font-family:var(--ui);font-weight:600;padding:2px 7px;border-radius:10px;background:var(--pink-dim);color:var(--pink2)">${escHtml(m)}</span>`).join('')}</div>`:''}
+      ${sourceHtml}
+    </div>`;
+  }).join('');
   renderMarketMap();
 }
 function removeFormat(i) { ideationData.formatLibrary.splice(i,1); saveIdeation(); renderFormatLibrary(); }
+
 
 // ── SCAN OUTLIERS ──
 async function scanWatchlistOutliers() {
@@ -3556,11 +3608,12 @@ async function scanWatchlistOutliers() {
     const text = data.content?.[0]?.text || '[]';
     const clean = text.replace(/```json|```/g, '').trim();
     const formats = JSON.parse(clean);
+    const topSrc = rawOutliers.slice(0,5).filter(v=>v.title).map(v=>({title:v.title,channel:v.channel,videoId:v.videoId,thumbnail:v.thumbnail||(v.videoId?'https://img.youtube.com/vi/'+v.videoId+'/mqdefault.jpg':''),url:v.videoId?'https://youtube.com/watch?v='+v.videoId:''}));
     const existing = new Set(ideationData.formatLibrary.map(f => f.name.toLowerCase()));
     let added = 0;
     for (const f of formats) {
       if (!existing.has(f.name.toLowerCase())) {
-        ideationData.formatLibrary.push({ id: Date.now() + Math.random(), name: f.name, description: f.description, example: f.example, marketUsage: f.marketUsage || [] });
+        ideationData.formatLibrary.push({ id: Date.now() + Math.random(), name: f.name, description: f.description, example: f.example, marketUsage: f.marketUsage || [], sourceVideos: topSrc });
         added++;
       }
     }
@@ -3647,8 +3700,9 @@ function renderMarketMap() {
     <tbody>${formats.map(f=>`<tr>
       <td style="padding:6px 8px;font-family:var(--ui);font-weight:600;color:var(--text);border:1px solid var(--border);white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis" title="${escHtml(f.name)}">${escHtml(f.name)}</td>
       ${MARKETS.map(m=>{
-        const used = (f.marketUsage||[]).some(u=>u.toLowerCase().includes(m.split('/')[0].trim().toLowerCase()));
-        const isYours = myMarkets.some(my=>my.toLowerCase().includes(m.split('/')[0].trim().toLowerCase()));
+        const mNorm = m.toLowerCase().replace(/\s*\/\s*/g,'/').trim();
+        const used = (f.marketUsage||[]).some(u=>u.toLowerCase().replace(/\s*\/\s*/g,'/').trim()===mNorm);
+        const isYours = myMarkets.some(my=>my.toLowerCase().replace(/\s*\/\s*/g,'/').trim()===mNorm);
         if (used) return `<td style="text-align:center;padding:4px;border:1px solid var(--border);background:rgba(99,102,241,0.12)">✓</td>`;
         if (isYours) return `<td style="text-align:center;padding:4px;border:1px solid var(--border);background:rgba(236,72,153,0.12)" title="Opportunity for your channel!">⭐</td>`;
         return `<td style="text-align:center;padding:4px;border:1px solid var(--border);color:var(--muted2)">–</td>`;
